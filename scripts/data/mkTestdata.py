@@ -69,7 +69,7 @@ def main():
     print('Number of different words for test dataset is {}'.format(len(test_word_set)))
     cf.set('Data', 'test_num_word', len(test_word_set))
 
-    for v in test_word_set:
+    for v in list(test_word_set):
         if not v in word2Idx.keys():
             test_num_oov += 1
 

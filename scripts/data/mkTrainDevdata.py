@@ -85,10 +85,10 @@ def main():
     cf.set('Data', 'train_num_word', len(train_word_set))
     cf.set('Data', 'dev_num_word', len(dev_word_set))
 
-    for v in train_word_set:
+    for v in list(train_word_set):
         if not v in word2Idx.keys():
             train_num_oov += 1
-    for v in dev_word_set:
+    for v in list(dev_word_set):
         if not v in word2Idx.keys():
             dev_num_oov += 1
     print('Number of oov words for train dataset is {}'.format(train_num_oov))

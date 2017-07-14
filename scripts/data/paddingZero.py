@@ -48,6 +48,8 @@ def _zero_padding():
                 open(join(padding_dir, sys.argv[1] + "_padding.dat"), "wb"),
                 True)
 
+    print('Padding zero is done!')
+
 def main():
     _zero_padding()
 
