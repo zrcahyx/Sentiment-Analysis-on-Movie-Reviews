@@ -66,7 +66,7 @@ def main():
     print('Number of sentences for test dataset is {}'.format(test_num_sentence))
     cf.set('Data', 'test_num_sentence', test_num_sentence)
 
-    print('Number of different words for test dataset is {}'.format(len(test_word_set)))))
+    print('Number of different words for test dataset is {}'.format(len(test_word_set)))
     cf.set('Data', 'test_num_word', len(test_word_set))
 
     for v in test_word_set:
