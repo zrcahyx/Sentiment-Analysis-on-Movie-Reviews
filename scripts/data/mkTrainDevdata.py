@@ -101,26 +101,26 @@ def main():
     with open(get_cfg_path(), 'w') as f:
         cf.write(f)
 
-    picke_data_dir = join(dirname(dirname(dirname(abspath(__file__)))),
+    pickle_data_dir = join(dirname(dirname(dirname(abspath(__file__)))),
                           'data',
                           'pickle_data')
     pickle.dump(train_data,
-                open(join(picke_data_dir, 'train.dat'), "wb"),
+                open(join(pickle_data_dir, 'train.dat'), "wb"),
                 True)
     pickle.dump(dev_data,
-                open(join(picke_data_dir, 'dev.dat'), "wb"),
+                open(join(pickle_data_dir, 'dev.dat'), "wb"),
                 True)
     pickle.dump(train_word_set,
-                open(join(picke_data_dir, 'train_word_set.dat'), "wb"),
+                open(join(pickle_data_dir, 'train_word_set.dat'), "wb"),
                 True)
     pickle.dump(dev_word_set,
-                open(join(picke_data_dir, 'dev_word_set.dat'), "wb"),
+                open(join(pickle_data_dir, 'dev_word_set.dat'), "wb"),
                 True)
     pickle.dump(train_oov_set,
-                open(join(picke_data_dir, 'train_oov_set.dat'), "wb"),
+                open(join(pickle_data_dir, 'train_oov_set.dat'), "wb"),
                 True)
     pickle.dump(dev_oov_set,
-                open(join(picke_data_dir, 'dev_oov_set.dat'), "wb"),
+                open(join(pickle_data_dir, 'dev_oov_set.dat'), "wb"),
                 True)
 
     print('OOV set for train dataset is:')

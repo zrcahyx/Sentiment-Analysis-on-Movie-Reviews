@@ -80,17 +80,17 @@ def main():
     with open(get_cfg_path(), 'w') as f:
         cf.write(f)
 
-    picke_data_dir = join(dirname(dirname(dirname(abspath(__file__)))),
+    pickle_data_dir = join(dirname(dirname(dirname(abspath(__file__)))),
                           'data',
                           'pickle_data')
     pickle.dump(test_data,
-                open(join(picke_data_dir, 'test.dat'), "wb"),
+                open(join(pickle_data_dir, 'test.dat'), "wb"),
                 True)
     pickle.dump(test_word_set,
-                open(join(picke_data_dir, 'test_word_set.dat'), "wb"),
+                open(join(pickle_data_dir, 'test_word_set.dat'), "wb"),
                 True)
     pickle.dump(test_oov_set,
-                open(join(picke_data_dir, 'test_oov_set.dat'), "wb"),
+                open(join(pickle_data_dir, 'test_oov_set.dat'), "wb"),
                 True)
 
     print('OOV set for test dataset is:')
