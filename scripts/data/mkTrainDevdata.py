@@ -50,14 +50,16 @@ def main():
             input_raw = line_str[2].lower()
             example['label'] = int(line_str[3])
 
-            input_str = input_raw.split()
-            input_idx = []
-            for v in input_str:
+            input_str_raw = input_raw.split()
+            input_idx, input_str = [], []
+            for v in input_str_raw:
                 if v in word2Idx.keys():
                     input_idx.append(word2Idx[v])
+                    input_str.append(v)
                 else:
                     v2list = oov_word_proc(v)
                     for vv in v2list:
+                        input_str.append(vv)
                         if vv in word2Idx.keys():
                             input_idx.append(word2Idx[vv])
                         else:
