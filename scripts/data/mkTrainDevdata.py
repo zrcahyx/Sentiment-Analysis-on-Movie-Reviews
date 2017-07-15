@@ -19,7 +19,7 @@ def main():
         word2Idx = pickle.load(f)
 
     train_data, dev_data, train_word_set, dev_word_set = [], [], set(), set()
-    train_num_oov, dev_num_oov = 0, 0
+    train_num_oov, dev_num_oov, train_oov_set, dev_oov_set = 0, 0, set(), set()
     tsv_data_dir = join(dirname(dirname(dirname(abspath(__file__)))),
                         'data',
                         'tsv_data')
@@ -88,9 +88,11 @@ def main():
     for v in list(train_word_set):
         if not v in word2Idx.keys():
             train_num_oov += 1
+            train_oov_set.add(v)
     for v in list(dev_word_set):
         if not v in word2Idx.keys():
             dev_num_oov += 1
+            dev_oov_set.add(v)
     print('Number of oov words for train dataset is {}'.format(train_num_oov))
     print('Number of oov words for dev dataset is {}'.format(dev_num_oov))
     cf.set('Data', 'train_num_oov', train_num_oov)
@@ -114,6 +116,17 @@ def main():
     pickle.dump(dev_word_set,
                 open(join(picke_data_dir, 'dev_word_set.dat'), "wb"),
                 True)
+    pickle.dump(train_oov_set,
+                open(join(picke_data_dir, 'train_oov_set.dat'), "wb"),
+                True)
+    pickle.dump(dev_oov_set,
+                open(join(picke_data_dir, 'dev_oov_set.dat'), "wb"),
+                True)
+
+    print('OOV set for train dataset is:')
+    print(train_oov_set)
+    print('OOV set for dev dataset is:')
+    print(dev_oov_set)
 
 if __name__ == '__main__':
     main()

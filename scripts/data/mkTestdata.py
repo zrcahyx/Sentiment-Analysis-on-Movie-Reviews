@@ -18,7 +18,7 @@ def main():
     with open(word2Idx_path, 'r') as f:
         word2Idx = pickle.load(f)
 
-    test_data, test_word_set = [], set()
+    test_data, test_word_set, test_oov_set = [], set(), set()
     test_num_oov = 0
     tsv_data_dir = join(dirname(dirname(dirname(abspath(__file__)))),
                         'data',
@@ -72,6 +72,7 @@ def main():
     for v in list(test_word_set):
         if not v in word2Idx.keys():
             test_num_oov += 1
+            test_oov_set.add(v)
 
     print('Number of oov words for test dataset is {}'.format(test_num_oov))
     cf.set('Data', 'test_num_oov', test_num_oov)
@@ -88,6 +89,12 @@ def main():
     pickle.dump(test_word_set,
                 open(join(picke_data_dir, 'test_word_set.dat'), "wb"),
                 True)
+    pickle.dump(test_oov_set,
+                open(join(picke_data_dir, 'test_oov_set.dat'), "wb"),
+                True)
+
+    print('OOV set for test dataset is:')
+    print(test_oov_set)
 
 if __name__ == '__main__':
     main()
