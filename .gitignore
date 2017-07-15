@@ -102,3 +102,11 @@ ENV/
 
 # python
 *.pyc
+
+# txt
+*.txt
+
+# dat
+/data/word_vec/word2vec.dat
+/data/word_vec/word2Idx.dat
+
