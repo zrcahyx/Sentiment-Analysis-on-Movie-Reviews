@@ -58,7 +58,10 @@ def main():
                         if vv in word2Idx.keys():
                             input_idx.append(word2Idx[vv])
                         else:
-                            input_idx.append(word2Idx['UNKNOWN'])
+                            if 'UNKNOWN' in word2Idx.keys():
+                                input_idx.append(word2Idx['UNKNOWN'])
+                            if 'unknown' in word2Idx.keys():
+                                input_idx.append(word2Idx['unknown'])
             example['input'] = np.array(input_idx)
 
             test_data.append(example)
