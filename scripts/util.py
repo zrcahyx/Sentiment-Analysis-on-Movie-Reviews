@@ -32,6 +32,8 @@ def oov_word_proc(oov):
     # unxxx -> not xxx
     if re.match('un.+', oov):
         return ['not', oov[2:]]
+    # default
+    return [oov]
 
 
 def main():
