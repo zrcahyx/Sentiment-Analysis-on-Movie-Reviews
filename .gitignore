@@ -107,8 +107,7 @@ ENV/
 *.txt
 
 # word_vec
-/data/word_vec/word2vec.dat
-/data/word_vec/word2Idx.dat
+*.dat
 /data/word_vec/words.lst
 
 
