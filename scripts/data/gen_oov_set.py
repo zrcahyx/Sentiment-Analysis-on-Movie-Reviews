@@ -25,7 +25,7 @@ def main():
                 open(join(pickle_data_dir, sys.argv[1] + '_oov_set.dat'), "wb"),
                 True)
 
-    print('OOV set for ' + sys.argv[1] ' dataset is:')
+    print('OOV set for ' + sys.argv[1] + ' dataset is:')
     print(oov_set)
 
 if __name__ == '__main__':
