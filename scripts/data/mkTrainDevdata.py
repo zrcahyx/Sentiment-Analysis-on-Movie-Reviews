@@ -6,9 +6,10 @@ from os.path import dirname, abspath, join
 import sys
 import ConfigParser
 import cPickle as pickle
+import re
 
 sys.path.append(dirname(dirname(abspath(__file__))))
-from util import get_cfg_path, get_file_num_line
+from util import get_cfg_path, get_file_num_line, oov_word_proc
 
 def main():
     word2Idx_path = join(dirname(dirname(dirname(abspath(__file__)))),
@@ -55,7 +56,12 @@ def main():
                 if v in word2Idx.keys():
                     input_idx.append(word2Idx[v])
                 else:
-                    input_idx.append(word2Idx['UNKNOWN'])
+                    v2list = oov_word_proc(v)
+                    for vv in v2list:
+                        if vv in word2Idx.keys():
+                            input_idx.append(word2Idx[vv])
+                        else:
+                            input_idx.append(word2Idx['UNKNOWN'])
             example['input'] = np.array(input_idx)
 
             if line_idx <= train_examples:
@@ -85,6 +91,7 @@ def main():
     cf.set('Data', 'train_num_word', len(train_word_set))
     cf.set('Data', 'dev_num_word', len(dev_word_set))
 
+    # gen oov set
     for v in list(train_word_set):
         if not v in word2Idx.keys():
             train_num_oov += 1
@@ -101,6 +108,7 @@ def main():
     with open(get_cfg_path(), 'w') as f:
         cf.write(f)
 
+    # pickle dump
     pickle_data_dir = join(dirname(dirname(dirname(abspath(__file__)))),
                           'data',
                           'pickle_data')

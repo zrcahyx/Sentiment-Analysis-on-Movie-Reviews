@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 from os.path import abspath, dirname, join
+import re
 
 def get_cfg_path():
     config_dir = join(dirname(dirname(abspath(__file__))), 'config')
@@ -14,6 +15,24 @@ def get_file_num_line(file_path):
         for line in f:
             num_line += 1
     return num_line
+
+def oov_word_proc(oov):
+    # xxx-xxx
+    if re.match('.+-.+', oov):
+        return oov.split('-')
+    # number -> 0
+    if re.match('\d+', oov):
+        return ['0']
+    # xxxly -> xxx
+    if re.match('.+ly', oov):
+        return [oov[:-2]]
+    # xxxtted -> xxxt
+    if re.match('.+tted', oov):
+        return [oov[:-3]]
+    # unxxx -> not xxx
+    if re.match('un.+', oov):
+        return ['not', oov[2:]]
+
 
 def main():
     pass

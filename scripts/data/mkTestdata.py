@@ -6,9 +6,10 @@ from os.path import dirname, abspath, join
 import sys
 import ConfigParser
 import cPickle as pickle
+import re
 
 sys.path.append(dirname(dirname(abspath(__file__))))
-from util import get_cfg_path, get_file_num_line
+from util import get_cfg_path, get_file_num_line, oov_word_proc
 
 def main():
     word2Idx_path = join(dirname(dirname(dirname(abspath(__file__)))),
@@ -50,7 +51,12 @@ def main():
                 if v in word2Idx.keys():
                     input_idx.append(word2Idx[v])
                 else:
-                    input_idx.append(word2Idx['UNKNOWN'])
+                    v2list = oov_word_proc(v)
+                    for vv in v2list:
+                        if vv in word2Idx.keys():
+                            input_idx.append(word2Idx[vv])
+                        else:
+                            input_idx.append(word2Idx['UNKNOWN'])
             example['input'] = np.array(input_idx)
 
             test_data.append(example)
