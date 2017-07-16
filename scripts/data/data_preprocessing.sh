@@ -7,3 +7,7 @@
 ./paddingZero.py train
 ./paddingZero.py dev
 ./paddingZero.py test
+./gen_tfrecords.py train
+./gen_tfrecords.py dev
+./gen_tfrecords.py test
+

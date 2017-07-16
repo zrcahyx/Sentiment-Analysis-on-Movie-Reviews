@@ -110,5 +110,5 @@ ENV/
 *.dat
 /data/word_vec/words.lst
 
-
-
+# .DS_Store
+.DS_Store

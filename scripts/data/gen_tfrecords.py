@@ -32,15 +32,19 @@ def main():
     for i, v in enumerate(dataset):
         # bytes格式
         input_raw = dataset[i]['input'].astype(np.float32).tobytes()
-        session_id_raw = dataset[i]['session_id'].encode('utf-8')
-        request_label_raw = (np.array(dataset[i]['output'][-1])
-                             .astype(np.float32).tobytes())
-        example = tf.train.Example(features=tf.train.Features(feature={
-            'input': _bytes_feature(input_raw),
-            'label': _bytes_feature(normal_label_raw),
-            'request_label': _bytes_feature(request_label_raw),
-            'session_id': _bytes_feature(session_id_raw)
-        }))
+        if sys.argv[1] == 'test':
+            example = tf.train.Example(features=tf.train.Features(feature={
+                'input': _bytes_feature(input_raw),
+                'PhraseId': _int64_feature(dataset[i]['PhraseId']),
+                'SentenceId': _int64_feature(dataset[i]['SentenceId'])
+            }))
+        else:
+             example = tf.train.Example(features=tf.train.Features(feature={
+                'input': _bytes_feature(input_raw),
+                'label': _int64_feature(dataset[i]['label']),
+                'PhraseId': _int64_feature(dataset[i]['PhraseId']),
+                'SentenceId': _int64_feature(dataset[i]['SentenceId'])
+            }))
         writer.write(example.SerializeToString())
     writer.close()
 
