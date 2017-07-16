@@ -24,9 +24,6 @@ flags.DEFINE_float('keep_prob', 0.7, 'The keep probability for lstm dropout.')
 flags.DEFINE_float('beta', 0.0001, 'The regularization term for l2 norm.')
 flags.DEFINE_integer('lstm_units', 100, 'lstm output units.')
 flags.DEFINE_integer('output_units', 5, 'output units.')
-flags.DEFINE_integer('early_stop_epochs',
-                     3,
-                     'The maximum number of times when validation gets worse.')
 
 # Other Parameters
 flags.DEFINE_integer('gpu', 0, 'Which gpu to use.')
