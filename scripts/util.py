@@ -9,6 +9,9 @@ def get_cfg_path():
     cfg_path = join(config_dir, 'config.cfg')
     return cfg_path
 
+def get_num_records(tf_record_file):
+    return len([x for x in tf.python_io.tf_record_iterator(tf_record_file)])
+
 def get_file_num_line(file_path):
     num_line = 0
     with open(file_path, 'r') as f:
