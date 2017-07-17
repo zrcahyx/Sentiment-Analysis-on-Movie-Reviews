@@ -18,10 +18,10 @@ logging.set_verbosity(tf.logging.INFO)
 
 # Model Parameters
 flags.DEFINE_integer('num_epochs', 20, 'Number of epochs to run trainer.')
-flags.DEFINE_float('learning_rate', 0.0001, 'Initial learning rate.')
+flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 flags.DEFINE_integer('batch_size', 128, 'Batch size.')
 flags.DEFINE_float('keep_prob', 0.5, 'The keep probability for lstm dropout.')
-flags.DEFINE_float('beta', 0.005, 'The regularization term for l2 norm.')
+flags.DEFINE_float('beta', 0.001, 'The regularization term for l2 norm.')
 flags.DEFINE_integer('lstm_units', 100, 'lstm output units.')
 flags.DEFINE_integer('output_units', 5, 'output units.')
 
@@ -50,7 +50,9 @@ CHECKPOINT_BASENAME = 'model.ckpt'
 
 def _run_training():
     init = tf.random_uniform_initializer(-0.1, 0.1)
-    opt = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
+    lr = FLAGS.learning_rate
+    opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+    # opt = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
 
     with tf.device('/gpu:%d' % FLAGS.gpu):
         with tf.name_scope('Train'):
@@ -86,6 +88,7 @@ def _run_training():
                              save_summaries_secs=120)
 
     with sv.managed_session(config=sess_config) as sess:
+        dev_acc_past = 0
         for epoch in xrange(FLAGS.num_epochs):
             if sv.should_stop():
                 break
@@ -105,6 +108,12 @@ def _run_training():
 
             dev_loss, dev_acc = sess.run([dev_model.loss,
                                                   dev_model.accuracy])
+            if dev_acc < dev_acc_past:
+                lr /= 2
+                train_model.opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+                train_model.train_op = train_model.opt.minimize(train_model.loss)
+            dev_acc_past = dev_acc
+
             logging.info(
                 'train loss for epoch %d is %f, accuracy is %f'
                 % (epoch + 1, avg_loss, avg_acc))
