@@ -62,6 +62,7 @@ class Input(object):
 
         num_epochs = None
         records_num = get_num_records(filename)
+        print(records_num)
         filename_queue = tf.train.string_input_producer([filename],
                                                         num_epochs=num_epochs)
         if mode == 'test':
