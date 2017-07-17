@@ -25,6 +25,7 @@ class LSTM_attention(object):
                  data,
                  mode,
                  lstm_units,
+                 hidden_units,
                  output_units,
                  init,
                  beta=0.0001,
@@ -32,6 +33,8 @@ class LSTM_attention(object):
         self.data = data
         self.mode = mode
         self.lstm_units = lstm_units
+        # a list lstm-attention-fc-output
+        self.hidden_units = hidden_units
         self.output_units = output_units
         self.init = init
         self.beta = beta
@@ -44,17 +47,7 @@ class LSTM_attention(object):
         with tf.name_scope('Attention'):
             attention_output = self._attention(lstm_outputs)
 
-        with tf.variable_scope('Affine', initializer=self.init):
-            weights = tf.get_variable('weights',
-                                      [lstm_units, output_units],
-                                      regularizer=self.regularizer)
-            biases = tf.get_variable('biases',
-                                     [output_units])
-
-        with tf.name_scope('Pred'):
-            pred = tf.add(tf.matmul(attention_output, weights),
-                          biases,
-                          name='pred')
+        pred = self._full_connected(attention_output)
         self.pred = nn.softmax(pred)
         self.pred_label = tf.argmax(pred, 1)
 
@@ -140,6 +133,38 @@ class LSTM_attention(object):
             outputs.append(tf.multiply(v, lstm_outputs[i]))
 
         return tf.add_n(outputs)
+
+    def _full_connected(self, attention_output):
+        hu = self.hidden_units
+        for i in xrange(len(hu) + 1):
+            with tf.variable_scope('Affine' + str(i + 1),
+                                   initializer=self.init):
+                if i == 0:
+                    weights = tf.get_variable('weights',
+                                              [self.lstm_units, hu[i]],
+                                              regularizer=self.regularizer)
+                    biases = tf.get_variable('biases', [hu[i]])
+                    hidden_output = tf.add(tf.matmul(attention_output, weights),
+                                           biases,
+                                           name='hidden_output')
+                elif i == len(hu):
+                    weights = tf.get_variable('weights',
+                                              [hu[i - 1], self.output_units],
+                                              regularizer=self.regularizer)
+                    biases = tf.get_variable('biases', [self.output_units])
+                    with tf.name_scope('Pred'):
+                        pred = tf.add(tf.matmul(hidden_output, weights),
+                                      biases,
+                                      name='pred')
+                    return pred
+                else:
+                    weights = tf.get_variable('weights',
+                                              [hu[i - 1], hu[i]],
+                                              regularizer=self.regularizer)
+                    biases = tf.get_variable('biases', [hu[i]])
+                    hidden_output = tf.add(tf.matmul(hidden_output, weights),
+                                           biases,
+                                           name='hidden_output')
 
 
 class WordVec(object):
