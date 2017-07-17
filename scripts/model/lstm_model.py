@@ -107,7 +107,7 @@ class LSTM_attention(object):
     def _attention(self, lstm_outputs):
         with tf.variable_scope('Attention', initializer=self.init):
             weights = tf.get_variable('weights',
-                                        [self.output_units, self.output_units])
+                                        [self.lstm_units, self.output_units])
             biases = tf.get_variable('biases',
                                         [1, self.output_units])
             u_w = tf.get_variable('u_w',
