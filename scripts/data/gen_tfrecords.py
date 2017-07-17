@@ -30,6 +30,7 @@ def main():
         dataset = pickle.load(f)
 
     for i, v in enumerate(dataset):
+        print('Serializing example {}!'.format(i + 1))
         # bytes格式
         input_raw = dataset[i]['input'].astype(np.float32).tobytes()
         if sys.argv[1] == 'test':
