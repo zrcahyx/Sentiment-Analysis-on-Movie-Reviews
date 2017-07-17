@@ -114,3 +114,6 @@ ENV/
 
 # saved model
 saved_model/
+
+# submission
+submission.csv
