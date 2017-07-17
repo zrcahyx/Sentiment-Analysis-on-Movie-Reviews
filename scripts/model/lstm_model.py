@@ -75,7 +75,7 @@ class LSTM_attention(object):
 
         if self.mode == 'train':
             with tf.name_scope('TrainOp'):
-                train_op = self.opt.minimize(self.loss)
+                self.train_op = self.opt.minimize(self.loss)
 
     def _rnn(self, x):
         word_idx = x
@@ -113,13 +113,20 @@ class LSTM_attention(object):
             u_w = tf.get_variable('u_w',
                                         [self.output_units, 1])
 
-        hidden_with_attention = []
+        outputs, scores = [], []
         for v in lstm_outputs:
             hidden_rep = nn.tanh(tf.add(tf.matmul(v, weights), biases))
-            attention_score = tf.matmul(hidden_rep, u_w)
-            hidden_with_attention.append(tf.multiply(attention_score, v))
+            scores.append(tf.matmul(hidden_rep, u_w))
+        # list -> tensor
+        scores = tf.concat(scores, axis=1)
+        # softmax
+        scores = nn.softmax(scores, dim=-1)
+        # tensor -> list
+        scores = tf.unstack(scores, axis=1)
+        for v in scores:
+            outputs.append(tf.multiply(scores, v))
 
-        return tf.add_n(hidden_with_attention)
+        return tf.add_n(outputs)
 
 
 class WordVec(object):
