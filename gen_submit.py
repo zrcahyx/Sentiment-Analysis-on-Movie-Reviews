@@ -9,7 +9,7 @@ from pandas import DataFrame
 
 import tensorflow as tf
 
-sys.path.append(join(abspath(__file__), 'scripts'))
+sys.path.append(join(dirname(abspath(__file__)), 'scripts'))
 from data.decode_tfrecords import read_and_decode
 from model.lstm_model import LSTM_attention, Input
 from util import get_num_records, get_cfg_path
