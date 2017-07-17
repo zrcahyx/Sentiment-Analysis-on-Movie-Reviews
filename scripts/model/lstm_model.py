@@ -123,10 +123,14 @@ class LSTM_attention(object):
         scores = nn.softmax(scores, dim=-1)
         # tensor -> list
         scores = tf.unstack(scores, axis=1)
-        print(len(scores))
-        print(scores[0].get_shape())
-        input('> ')
+
         for i, v in enumerate(scores):
+            # v: (64, 1) -> (64,1)
+            v = tf.reshape(v, [v.get_shape()[0], 1])
+            # v: (64,1) -> [(64,1), (64,1), ...]
+            v = [v] * self.lstm_units
+            # v: (64,self.lstm_units)
+            v = tf.concat(v, axis=1)
             outputs.append(tf.multiply(v, lstm_outputs[i]))
 
         return tf.add_n(outputs)
