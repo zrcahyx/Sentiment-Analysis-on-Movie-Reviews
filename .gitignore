@@ -115,3 +115,6 @@ ENV/
 
 # saved model
 saved_model/
+
+# data
+/data
