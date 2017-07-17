@@ -17,7 +17,7 @@ logging = tf.logging
 logging.set_verbosity(tf.logging.INFO)
 
 # Model Parameters
-flags.DEFINE_integer('num_epochs', 10, 'Number of epochs to run trainer.')
+flags.DEFINE_integer('num_epochs', 20, 'Number of epochs to run trainer.')
 flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
 flags.DEFINE_integer('batch_size', 64, 'Batch size.')
 flags.DEFINE_float('keep_prob', 0.6, 'The keep probability for lstm dropout.')
