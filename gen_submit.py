@@ -42,7 +42,7 @@ saver = tf.train.Saver()
 
 config = tf.ConfigProto(allow_soft_placement=True)
 sess = tf.Session(config=config)
-saver.restore(sess, tf.train.latest_checkpoint(save_path))
+saver.restore(sess, 'saved_model/model.ckpt')
 
 test_Sentiment = sess.run(test_model.pred_label)
 test_PhraseId = test_data.PhraseId
