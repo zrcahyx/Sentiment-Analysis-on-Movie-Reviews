@@ -21,7 +21,7 @@ flags.DEFINE_integer('num_epochs', 50, 'Number of epochs to run trainer.')
 flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
 flags.DEFINE_integer('batch_size', 128, 'Batch size.')
 flags.DEFINE_float('keep_prob', 0.5, 'The keep probability for lstm dropout.')
-flags.DEFINE_float('beta', 0.001, 'The regularization term for l2 norm.')
+flags.DEFINE_float('beta', 0.005, 'The regularization term for l2 norm.')
 flags.DEFINE_integer('lstm_units', 100, 'lstm output units.')
 flags.DEFINE_integer('output_units', 5, 'output units.')
 
