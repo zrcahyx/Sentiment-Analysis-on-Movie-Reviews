@@ -101,21 +101,19 @@ esac
 shift # past argument or value
 done
 
-
-echo "#!/bin/bash">run.sh
-echo "source /aifs/users/rcz56/env/bin/activate">>run.sh
-echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64'>>run.sh
-echo "python scripts/train/train_normal.py"$py_command>>run.sh
+echo "#!/bin/bash">qsub.sh
+echo "source /aifs/users/rcz56/env/bin/activate">>qsub.sh
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64'>>qsub.sh
+echo "python scripts/train/train_normal.py"$py_command>>qsub.sh
 
 host_list=('guangzhou' 'wuhan' 'nanjing' 'jinan')
 
-mkdir -p log
-
 if [ " ${host_list[@]} " =~ " ${HOST} " ] ; then
-    qsub -cwd -S /bin/bash -o LOG -j y -l hostname=$HOST run.sh
+    qsub -cwd -S /bin/bash -o LOG -j y -l hostname=$HOST qsub.sh
 else
     print_help
     exit 0
 fi
 
+rm qsub.sh
 
