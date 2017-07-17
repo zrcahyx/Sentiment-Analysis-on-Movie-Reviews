@@ -8,6 +8,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import nn
 from tensorflow.contrib import rnn
+from tensorflow.contrib import layers
+from tensorflow import GraphKeys
 
 
 class LSTM_attention(object):
@@ -39,9 +41,10 @@ class LSTM_attention(object):
 
         with tf.variable_scope('Affine', initializer=self.init):
             weights = tf.get_variable('weights',
-                                        [lstm_units, output_units])
+                                      [lstm_units, output_units],
+                                      regularizer=layers.l2_regularizer)
             biases = tf.get_variable('biases',
-                                        [output_units])
+                                     [output_units])
 
         with tf.name_scope('Pred'):
             pred = tf.add(tf.matmul(attention_output, weights),
@@ -55,12 +58,13 @@ class LSTM_attention(object):
                 label = tf.identity(data.label, 'label')
 
             with tf.name_scope('Loss'):
-                loss = tf.add(
-                    tf.reduce_mean(
+                normal_loss = tf.reduce_mean(
                         nn.softmax_cross_entropy_with_logits(logits=pred,
-                                                                labels=label)),
-                    self.beta * tf.reduce_sum(nn.l2_loss(weights)),
-                    name='loss')
+                                                             labels=label))
+                reg_losses = tf.get_collection(GraphKeys.REGULARIZATION_LOSSES)
+                loss = tf.add(normal_loss,
+                              self.beta * sum(reg_losses),
+                              name='loss')
             self.loss = loss
             tf.summary.scalar('loss', self.loss)
 
@@ -107,11 +111,10 @@ class LSTM_attention(object):
     def _attention(self, lstm_outputs):
         with tf.variable_scope('Attention', initializer=self.init):
             weights = tf.get_variable('weights',
-                                        [self.lstm_units, self.output_units])
-            biases = tf.get_variable('biases',
-                                        [1, self.output_units])
-            u_w = tf.get_variable('u_w',
-                                        [self.output_units, 1])
+                                      [self.lstm_units, self.output_units],
+                                      regularizer=layers.l2_regularizer)
+            biases = tf.get_variable('biases', [1, self.output_units])
+            u_w = tf.get_variable('u_w', [self.output_units, 1])
 
         outputs, scores = [], []
         for v in lstm_outputs:
