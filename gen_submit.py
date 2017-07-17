@@ -50,11 +50,7 @@ coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
 test_Sentiment = sess.run(test_model.pred_label)
-test_PhraseId = test_data.PhraseId
-print(type(test_Sentiment))
-print(test_Sentiment.shape)
-print(type(test_PhraseId))
-print(test_PhraseId.shape)
+test_PhraseId = sess.run(test_data.PhraseId)
 
 submission = pd.DataFrame({'PhraseId':test_PhraseId,
                            'Sentiment':test_Sentiment})
