@@ -112,3 +112,6 @@ ENV/
 
 # .DS_Store
 .DS_Store
+
+# saved model
+saved_model/
