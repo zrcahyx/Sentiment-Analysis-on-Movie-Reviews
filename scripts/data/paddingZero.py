@@ -35,6 +35,7 @@ def _zero_padding():
         cf.write(f)
 
     for i in xrange(len(dataset)):
+        print('Processing example {}!'.format(i + 1))
         # each turn's old input len
         oldLen = dataset[i]['input'].shape[0]
         margin_Len = maxLen - oldLen
