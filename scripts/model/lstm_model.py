@@ -125,6 +125,9 @@ class LSTM_attention(object):
         scores = tf.unstack(scores, axis=1)
 
         for i, v in enumerate(scores):
+            print(v)
+            print(type(v))
+            print(v.get_shape())
             # v: (64, 1) -> (64,1)
             v = tf.reshape(v, [v.get_shape()[0], 1])
             # v: (64,1) -> [(64,1), (64,1), ...]
