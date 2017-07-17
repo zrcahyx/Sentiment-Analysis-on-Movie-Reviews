@@ -124,9 +124,9 @@ class LSTM_attention(object):
         # tensor -> list
         scores = tf.unstack(scores, axis=1)
         for v in scores:
-            outputs.append(tf.multiply(scores, v))
+            outputs.append(tf.multiply(scores, lstm_outputs))
 
-        return tf.add_n(outputs)
+        return tf.add_n(outputs, )
 
 
 class WordVec(object):
