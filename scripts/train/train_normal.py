@@ -43,11 +43,15 @@ class Input(object):
     """ The input data. """
 
     def __init__(self, mode):
-        input, label, records_num = self._get_data(mode)
-
-        self.input = input
-        self.label = label
-        self.records_num = records_num
+        if mode == 'test':
+            input, records_num = self._get_data(mode)
+            self.input = input
+            self.records_num = records_num
+        else:
+            input, label, records_num = self._get_data(mode)
+            self.input = input
+            self.label = label
+            self.records_num = records_num
 
     @staticmethod
     def _get_data(mode):
