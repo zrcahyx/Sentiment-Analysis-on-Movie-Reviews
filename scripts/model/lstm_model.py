@@ -32,6 +32,7 @@ class LSTM_attention(object):
         self.init = init
         self.beta = beta
         self.keep_prob = keep_prob
+        self.regularizer = layers.l2_regularizer(scale=self.beta)
 
         with tf.name_scope('RNN'):
             lstm_outputs = self._rnn(data.input)
@@ -42,7 +43,7 @@ class LSTM_attention(object):
         with tf.variable_scope('Affine', initializer=self.init):
             weights = tf.get_variable('weights',
                                       [lstm_units, output_units],
-                                      regularizer=layers.l2_regularizer)
+                                      regularizer=self.regularizer)
             biases = tf.get_variable('biases',
                                      [output_units])
 
@@ -61,9 +62,10 @@ class LSTM_attention(object):
                 normal_loss = tf.reduce_mean(
                         nn.softmax_cross_entropy_with_logits(logits=pred,
                                                              labels=label))
+                # it's a list
                 reg_losses = tf.get_collection(GraphKeys.REGULARIZATION_LOSSES)
                 loss = tf.add(normal_loss,
-                              self.beta * sum(reg_losses),
+                              tf.add_n(reg_losses),
                               name='loss')
             self.loss = loss
             tf.summary.scalar('loss', self.loss)
@@ -84,9 +86,10 @@ class LSTM_attention(object):
     def _rnn(self, x):
         word_idx = x
         word_idx = tf.cast(word_idx, tf.int32)
-        init = tf.constant(WordVec.word_vecs)
+        init_embedding = tf.constant(WordVec.word_vecs)
         with tf.variable_scope('Embeddings'):
-            embeddings = tf.get_variable('embeddings', initializer=init)
+            embeddings = tf.get_variable('embeddings',
+                                         initializer=init_embedding)
         word_vec = nn.embedding_lookup(embeddings, word_idx)
         input = tf.unstack(word_vec, axis=1)
 
@@ -112,7 +115,7 @@ class LSTM_attention(object):
         with tf.variable_scope('Attention', initializer=self.init):
             weights = tf.get_variable('weights',
                                       [self.lstm_units, self.output_units],
-                                      regularizer=layers.l2_regularizer)
+                                      regularizer=self.regularizer)
             biases = tf.get_variable('biases', [1, self.output_units])
             u_w = tf.get_variable('u_w', [self.output_units, 1])
 
