@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import ConfigParser
 import cPickle as pickle
 from os.path import abspath, dirname, join
+import sys
 
 import numpy as np
 import tensorflow as tf
@@ -10,6 +12,10 @@ from tensorflow import nn
 from tensorflow.contrib import rnn
 from tensorflow.contrib import layers
 from tensorflow import GraphKeys
+
+sys.path.append(dirname(dirname(abspath(__file__))))
+from data.decode_tfrecords import read_and_decode
+from util import get_num_records, get_cfg_path
 
 
 class LSTM_attention(object):
@@ -149,3 +155,63 @@ class WordVec(object):
                               'word2vec.dat')
     with open(_word_weights_path, 'r') as f:
         word_vecs = pickle.load(f).astype(np.float32)
+
+
+class Input(object):
+    """ The input data. """
+
+    def __init__(self, mode):
+        if mode == 'test':
+            input, PhraseId, records_num = self._get_data(mode)
+            self.input = input
+            self.PhraseId = PhraseId
+            self.records_num = records_num
+        else:
+            input, label, records_num = self._get_data(mode)
+            self.input = input
+            self.label = label
+            self.records_num = records_num
+
+    @staticmethod
+    def _get_data(mode):
+        cf = ConfigParser.ConfigParser()
+        cf.read(get_cfg_path())
+        output_units = cf.getint('Model', 'output_units')
+        batch_size = cf.getint('Model', 'batch_size')
+
+        filename = join(dirname(dirname(dirname(abspath(__file__)))),
+                        'data',
+                        'tfrecords_data',
+                        mode + '.tfrecords')
+
+        num_epochs = None
+        records_num = get_num_records(filename)
+        filename_queue = tf.train.string_input_producer([filename],
+                                                        num_epochs=num_epochs)
+        if mode == 'test':
+            input, PhraseId, _ = read_and_decode(filename_queue, mode)
+            batch_size = records_num
+            input, PhraseId = tf.train.batch([input, PhraseId],
+                                   batch_size=batch_size,
+                                   num_threads=2,
+                                   capacity=1000 + 3 * batch_size)
+            return input, PhraseId, records_num
+        elif mode == 'dev':
+            input, label, _, _ = read_and_decode(filename_queue, mode)
+            label = tf.one_hot(label, output_units, name='label')
+            batch_size = records_num
+            input, label = tf.train.batch([input, label],
+                                          batch_size=batch_size,
+                                          num_threads=2,
+                                          capacity=1000 + 3 * batch_size)
+            return input, label, records_num
+        elif mode == 'train':
+            input, label, _, _ = read_and_decode(filename_queue, mode)
+            label = tf.one_hot(label, output_units, name='label')
+            batch_size = batch_size
+            input, label = tf.train.shuffle_batch([input, label],
+                                                  batch_size=batch_size,
+                                                  num_threads=2,
+                                                  capacity=1000 + 3 * batch_size,
+                                                  min_after_dequeue=1000)
+            return input, label, records_num

@@ -9,7 +9,7 @@ import tensorflow as tf
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 from data.decode_tfrecords import read_and_decode
-from model.lstm_model import LSTM_attention
+from model.lstm_model import LSTM_attention, Input
 from util import get_num_records, get_cfg_path
 
 flags = tf.flags
@@ -35,62 +35,17 @@ FLAGS = flags.FLAGS
 
 cf = ConfigParser.ConfigParser()
 cf.read(get_cfg_path())
+cf.set('Model', 'learning_rate', FLAGS.learning_rate)
+cf.set('Model', 'batch_size', FLAGS.batch_size)
+cf.set('Model', 'lstm_units', FLAGS.lstm_units)
+cf.set('Model', 'output_units', FLAGS.output_units)
+cf.set('Model', 'beta', FLAGS.beta)
+cf.set('Model', 'keep_prob', FLAGS.keep_prob)
+cf.set('Model', 'save_path', FLAGS.save_path)
+with open(get_cfg_path(), 'w') as f:
+        cf.write(f)
 
 CHECKPOINT_BASENAME = 'model.ckpt'
-
-
-class Input(object):
-    """ The input data. """
-
-    def __init__(self, mode):
-        if mode == 'test':
-            input, records_num = self._get_data(mode)
-            self.input = input
-            self.records_num = records_num
-        else:
-            input, label, records_num = self._get_data(mode)
-            self.input = input
-            self.label = label
-            self.records_num = records_num
-
-    @staticmethod
-    def _get_data(mode):
-        filename = join(dirname(dirname(dirname(abspath(__file__)))),
-                        'data',
-                        'tfrecords_data',
-                        mode + '.tfrecords')
-
-        num_epochs = None
-        records_num = get_num_records(filename)
-        filename_queue = tf.train.string_input_producer([filename],
-                                                        num_epochs=num_epochs)
-        if mode == 'test':
-            input, _, _ = read_and_decode(filename_queue, mode)
-            batch_size = records_num
-            input = tf.train.batch([input],
-                                   batch_size=batch_size,
-                                   num_threads=2,
-                                   capacity=1000 + 3 * batch_size)
-            return input, records_num
-        elif mode == 'dev':
-            input, label, _, _ = read_and_decode(filename_queue, mode)
-            label = tf.one_hot(label, FLAGS.output_units, name='label')
-            batch_size = records_num
-            input, label = tf.train.batch([input, label],
-                                          batch_size=batch_size,
-                                          num_threads=2,
-                                          capacity=1000 + 3 * batch_size)
-            return input, label, records_num
-        elif mode == 'train':
-            input, label, _, _ = read_and_decode(filename_queue, mode)
-            label = tf.one_hot(label, FLAGS.output_units, name='label')
-            batch_size = FLAGS.batch_size
-            input, label = tf.train.shuffle_batch([input, label],
-                                                  batch_size=batch_size,
-                                                  num_threads=2,
-                                                  capacity=1000 + 3 * batch_size,
-                                                  min_after_dequeue=1000)
-            return input, label, records_num
 
 
 def _run_training():
@@ -124,19 +79,6 @@ def _run_training():
                                            beta=FLAGS.beta,
                                            keep_prob=FLAGS.keep_prob)
 
-        with tf.name_scope('Test'):
-            with tf.name_scope('TestInput'):
-                test_data = Input('test')
-            with tf.variable_scope('Model', reuse=True):
-                test_model = LSTM_attention(data = test_data,
-                                            mode='test',
-                                            lstm_units=FLAGS.lstm_units,
-                                            output_units=FLAGS.output_units,
-                                            opt = opt,
-                                            init = init,
-                                            beta=FLAGS.beta,
-                                            keep_prob=FLAGS.keep_prob)
-
     sess_config = tf.ConfigProto(allow_soft_placement=True)
     sess_config.gpu_options.allow_growth = True
     sv = tf.train.Supervisor(logdir=FLAGS.save_path,
@@ -169,9 +111,6 @@ def _run_training():
             logging.info(
                 'dev   loss for epoch %d is %f, accuracy is %f'
                 % (epoch + 1, dev_loss, dev_acc))
-
-        sv.saver.restore(sess, tf.train.latest_checkpoint(FLAGS.save_path))
-        test_pred_label = sess.run(test_model.pred_label)
 
 
 def main(_):
