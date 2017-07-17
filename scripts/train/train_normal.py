@@ -161,7 +161,7 @@ def _run_training():
                 logging.info('training loss for epoch %d step %d is %f'
                              % (epoch + 1, step + 1, avg_loss))
 
-            dev_loss, dev_acc, dev_l2 = sess.run([dev_model.loss,
+            dev_loss, dev_acc = sess.run([dev_model.loss,
                                                   dev_model.accuracy])
             logging.info(
                 'train loss for epoch %d is %f, accuracy is %f'
