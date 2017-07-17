@@ -105,8 +105,6 @@ class LSTM_attention(object):
         return outputs
 
     def _attention(self, lstm_outputs):
-        print(len(lstm_outputs))
-        print(lstm_outputs[0].get_shape())
         with tf.variable_scope('Attention', initializer=self.init):
             weights = tf.get_variable('weights',
                                         [self.lstm_units, self.output_units])
@@ -125,8 +123,11 @@ class LSTM_attention(object):
         scores = nn.softmax(scores, dim=-1)
         # tensor -> list
         scores = tf.unstack(scores, axis=1)
-        for v in scores:
-            outputs.append(tf.multiply(scores, lstm_outputs))
+        print(len(scores))
+        print(scores[0].get_shape())
+        input('> ')
+        for i, v in enumerate(scores):
+            outputs.append(tf.multiply(v, lstm_outputs[i]))
 
         return tf.add_n(outputs)
 
