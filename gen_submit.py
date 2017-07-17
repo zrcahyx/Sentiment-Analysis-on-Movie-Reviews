@@ -21,7 +21,7 @@ lstm_units = cf.getint('Model', 'lstm_units')
 output_units = cf.getint('Model', 'output_units')
 beta = cf.getfloat('Model', 'beta')
 keep_prob = cf.getfloat('Model', 'keep_prob')
-save_path = cf.get('Model', 'saved_model')
+save_path = cf.get('Model', 'save_path')
 
 init = tf.random_uniform_initializer(-0.1, 0.1)
 opt = tf.train.AdamOptimizer(learning_rate=learning_rate)
