@@ -18,6 +18,8 @@ cf = ConfigParser.ConfigParser()
 cf.read(get_cfg_path())
 learning_rate = cf.getfloat('Model', 'learning_rate')
 lstm_units = cf.getint('Model', 'lstm_units')
+hidden_units = cf.get('Mode', 'hidden_units')
+hidden_units=[int(x) for x in hidden_units.split(',')]
 output_units = cf.getint('Model', 'output_units')
 beta = cf.getfloat('Model', 'beta')
 keep_prob = cf.getfloat('Model', 'keep_prob')
@@ -34,6 +36,7 @@ with tf.device('/gpu:0'):
             test_model = LSTM_attention(data = test_data,
                                         mode='test',
                                         lstm_units=lstm_units,
+                                        hidden_units=hidden_units,
                                         output_units=output_units,
                                         init = init,
                                         beta=beta,
