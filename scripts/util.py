@@ -3,6 +3,7 @@
 
 from os.path import abspath, dirname, join
 import re
+import tensorflow as tf
 
 def get_cfg_path():
     config_dir = join(dirname(dirname(abspath(__file__))), 'config')
