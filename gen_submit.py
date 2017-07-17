@@ -4,7 +4,7 @@
 import ConfigParser
 import sys
 from os.path import abspath, dirname, join
-import pandas as import pd
+import pandas as pd
 from pandas import DataFrame
 
 import tensorflow as tf
