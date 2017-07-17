@@ -63,7 +63,6 @@ def _run_training():
                                              mode='train',
                                              lstm_units=FLAGS.lstm_units,
                                              output_units=FLAGS.output_units,
-                                             opt = opt,
                                              init = init,
                                              beta=FLAGS.beta,
                                              keep_prob=FLAGS.keep_prob)
@@ -76,10 +75,12 @@ def _run_training():
                                            mode='dev',
                                            lstm_units=FLAGS.lstm_units,
                                            output_units=FLAGS.output_units,
-                                           opt = opt,
                                            init = init,
                                            beta=FLAGS.beta,
                                            keep_prob=FLAGS.keep_prob)
+
+    with tf.name_scope('TrainOp'):
+        train_op = opt.minimize(train_model.loss)
 
     sess_config = tf.ConfigProto(allow_soft_placement=True)
     sess_config.gpu_options.allow_growth = True
@@ -95,7 +96,7 @@ def _run_training():
             step_num = train_model.data.records_num // FLAGS.batch_size - 1
             for step in xrange(step_num):
                 _, train_loss, train_acc = sess.run(
-                    [train_model.train_op,
+                    [train_op,
                      train_model.loss,
                      train_model.accuracy])
                 if epoch == 0 and step == 0:
@@ -110,8 +111,9 @@ def _run_training():
                                                   dev_model.accuracy])
             if dev_acc < dev_acc_past:
                 lr /= 2
-                train_model.opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
-                train_model.train_op = train_model.opt.minimize(train_model.loss)
+                opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+                with tf.name_scope('TrainOp'):
+                    train_op = opt.minimize(train_model.loss)
             dev_acc_past = dev_acc
 
             logging.info(

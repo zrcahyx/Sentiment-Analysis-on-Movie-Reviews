@@ -26,7 +26,6 @@ class LSTM_attention(object):
                  mode,
                  lstm_units,
                  output_units,
-                 opt,
                  init,
                  beta=0.0001,
                  keep_prob=0.7):
@@ -34,7 +33,6 @@ class LSTM_attention(object):
         self.mode = mode
         self.lstm_units = lstm_units
         self.output_units = output_units
-        self.opt = opt
         self.init = init
         self.beta = beta
         self.keep_prob = keep_prob
@@ -84,10 +82,6 @@ class LSTM_attention(object):
                                             name='acc')
             self.accuracy = accuracy
             tf.summary.scalar('accuracy', self.accuracy)
-
-        if self.mode == 'train':
-            with tf.name_scope('TrainOp'):
-                self.train_op = self.opt.minimize(self.loss)
 
     def _rnn(self, x):
         word_idx = x

@@ -35,7 +35,6 @@ with tf.device('/gpu:0'):
                                         mode='test',
                                         lstm_units=lstm_units,
                                         output_units=output_units,
-                                        opt = opt,
                                         init = init,
                                         beta=beta,
                                         keep_prob=keep_prob)
