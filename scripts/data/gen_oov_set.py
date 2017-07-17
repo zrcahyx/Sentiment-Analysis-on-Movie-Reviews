@@ -35,6 +35,8 @@ def main():
     cf = ConfigParser.ConfigParser()
     cf.read(get_cfg_path())
     cf.set('Data', sys.argv[1] + '_num_oov', num_oov)
+    with open(get_cfg_path(), 'w') as f:
+        cf.write(f)
 
     pickle.dump(oov_set,
                 open(join(pickle_data_dir, sys.argv[1] + '_oov_set.dat'), "wb"),
