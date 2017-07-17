@@ -107,14 +107,10 @@ ENV/
 *.txt
 
 # word_vec
-*.dat
-/data/word_vec/words.lst
+/data/word_vec/
 
 # .DS_Store
 .DS_Store
 
 # saved model
 saved_model/
-
-# data
-/data
