@@ -61,6 +61,8 @@ coord.join(threads)
 
 sess.close()
 
+print('The submission.csv file is generated!')
+
 
 
 
