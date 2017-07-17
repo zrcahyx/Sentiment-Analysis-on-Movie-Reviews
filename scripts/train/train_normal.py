@@ -62,13 +62,12 @@ class Input(object):
 
         num_epochs = None
         records_num = get_num_records(filename)
-        print(records_num)
         filename_queue = tf.train.string_input_producer([filename],
                                                         num_epochs=num_epochs)
         if mode == 'test':
             input, _, _ = read_and_decode(filename_queue, mode)
             batch_size = records_num
-            input = tf.train.batch(input,
+            input = tf.train.batch([input],
                                    batch_size=batch_size,
                                    num_threads=2,
                                    capacity=1000 + 3 * batch_size)
