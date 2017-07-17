@@ -43,7 +43,7 @@ class Input(object):
     """ The input data. """
 
     def __init__(self, mode):
-        input, label, records_num = self._get_data(name)
+        input, label, records_num = self._get_data(mode)
 
         self.input = input
         self.label = label
