@@ -127,9 +127,9 @@ class LSTM_attention(object):
         for i, v in enumerate(scores):
             print(v)
             print(type(v))
-            print(v.get_shape())
+            print(v.get_shape()[0])
             # v: (64, 1) -> (64,1)
-            v = tf.reshape(v, [v.get_shape()[0], 1])
+            v = tf.reshape(v, [-1, 1])
             # v: (64,1) -> [(64,1), (64,1), ...]
             v = [v] * self.lstm_units
             # v: (64,self.lstm_units)
