@@ -23,6 +23,7 @@ flags.DEFINE_integer('batch_size', 128, 'Batch size.')
 flags.DEFINE_float('keep_prob', 0.5, 'The keep probability for lstm dropout.')
 flags.DEFINE_float('beta', 0.005, 'The regularization term for l2 norm.')
 flags.DEFINE_integer('lstm_units', 100, 'lstm output units.')
+flags.DEFINE_string('hidden_units', '64,64,64', 'hidden units.')
 flags.DEFINE_integer('output_units', 5, 'output units.')
 
 # Other Parameters
@@ -38,6 +39,7 @@ cf.read(get_cfg_path())
 cf.set('Model', 'learning_rate', FLAGS.learning_rate)
 cf.set('Model', 'batch_size', FLAGS.batch_size)
 cf.set('Model', 'lstm_units', FLAGS.lstm_units)
+cf.set('Model', 'hidden_units', FLAGS.hidden_units)
 cf.set('Model', 'output_units', FLAGS.output_units)
 cf.set('Model', 'beta', FLAGS.beta)
 cf.set('Model', 'keep_prob', FLAGS.keep_prob)
@@ -46,6 +48,7 @@ with open(get_cfg_path(), 'w') as f:
         cf.write(f)
 
 CHECKPOINT_BASENAME = 'model.ckpt'
+hidden_units=[int(x) for x in FLAGS.hidden_units.split(',')]
 
 
 def _run_training():
@@ -62,6 +65,7 @@ def _run_training():
                 train_model = LSTM_attention(data = train_data,
                                              mode='train',
                                              lstm_units=FLAGS.lstm_units,
+                                             hidden_units=hidden_units,
                                              output_units=FLAGS.output_units,
                                              init = init,
                                              beta=FLAGS.beta,
@@ -74,6 +78,7 @@ def _run_training():
                 dev_model = LSTM_attention(data = dev_data,
                                            mode='dev',
                                            lstm_units=FLAGS.lstm_units,
+                                           hidden_units=hidden_units,
                                            output_units=FLAGS.output_units,
                                            init = init,
                                            beta=FLAGS.beta,
