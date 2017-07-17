@@ -26,21 +26,23 @@ save_path = cf.get('Model', 'save_path')
 init = tf.random_uniform_initializer(-0.1, 0.1)
 opt = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
-with tf.name_scope('Test'):
-    with tf.name_scope('TestInput'):
-        test_data = Input('test')
-    with tf.variable_scope('Model', reuse=None):
-        test_model = LSTM_attention(data = test_data,
-                                    mode='test',
-                                    lstm_units=lstm_units,
-                                    output_units=output_units,
-                                    opt = opt,
-                                    init = init,
-                                    beta=beta,
-                                    keep_prob=keep_prob)
+with tf.device('/gpu:0'):
+    with tf.name_scope('Test'):
+        with tf.name_scope('TestInput'):
+            test_data = Input('test')
+        with tf.variable_scope('Model', reuse=None):
+            test_model = LSTM_attention(data = test_data,
+                                        mode='test',
+                                        lstm_units=lstm_units,
+                                        output_units=output_units,
+                                        opt = opt,
+                                        init = init,
+                                        beta=beta,
+                                        keep_prob=keep_prob)
 saver = tf.train.Saver()
 
 config = tf.ConfigProto(allow_soft_placement=True)
+config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 saver.restore(sess, 'saved_model/model.ckpt')
 
