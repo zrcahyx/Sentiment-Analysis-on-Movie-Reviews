@@ -4,6 +4,10 @@
 import cPickle as pickle
 from os.path import dirname, abspath, join
 import sys
+import ConfigParser
+
+sys.path.append(dirname(dirname(abspath(__file__))))
+from util import get_cfg_path
 
 def main():
     word2Idx_path = join(dirname(dirname(dirname(abspath(__file__)))),
@@ -27,6 +31,11 @@ def main():
             oov_set.add(v)
             print('Word <' + v + '> is not in the word list!')
             print('Current number of oov word is: {}'.format(num_oov))
+
+    cf = ConfigParser.ConfigParser()
+    cf.read(get_cfg_path())
+    cf.set('Data', sys.argv[1] + '_num_oov', num_oov)
+
     pickle.dump(oov_set,
                 open(join(pickle_data_dir, sys.argv[1] + '_oov_set.dat'), "wb"),
                 True)
