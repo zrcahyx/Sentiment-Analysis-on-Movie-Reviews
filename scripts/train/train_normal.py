@@ -136,8 +136,6 @@ def _run_training():
                                             init = init,
                                             beta=FLAGS.beta,
                                             keep_prob=FLAGS.keep_prob)
-    print('Build the graph successfully!')
-    input('> ')
 
     sess_config = tf.ConfigProto(allow_soft_placement=True)
     sess_config.gpu_options.allow_growth = True
