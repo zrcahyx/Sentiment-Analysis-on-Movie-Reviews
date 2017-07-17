@@ -18,9 +18,9 @@ logging.set_verbosity(tf.logging.INFO)
 
 # Model Parameters
 flags.DEFINE_integer('num_epochs', 10, 'Number of epochs to run trainer.')
-flags.DEFINE_float('learning_rate', 0.005, 'Initial learning rate.')
+flags.DEFINE_float('learning_rate', 0.0001, 'Initial learning rate.')
 flags.DEFINE_integer('batch_size', 64, 'Batch size.')
-flags.DEFINE_float('keep_prob', 0.7, 'The keep probability for lstm dropout.')
+flags.DEFINE_float('keep_prob', 0.6, 'The keep probability for lstm dropout.')
 flags.DEFINE_float('beta', 0.0001, 'The regularization term for l2 norm.')
 flags.DEFINE_integer('lstm_units', 100, 'lstm output units.')
 flags.DEFINE_integer('output_units', 5, 'output units.')
