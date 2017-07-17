@@ -80,9 +80,8 @@ class Input(object):
         elif mode == 'train':
             input, label, _, _ = read_and_decode(filename_queue, mode)
             label = tf.one_hot(label, FLAGS.output_units, name='label')
-            batch_size = records_num
             input, label = tf.train.shuffle_batch([input, label],
-                                                  batch_size=batch_size,
+                                                  batch_size=FLAGS.batch_size,
                                                   num_threads=2,
                                                   capacity=1000 + 3 * batch_size,
                                                   min_after_dequeue=1000)
