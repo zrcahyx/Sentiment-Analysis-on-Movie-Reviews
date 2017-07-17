@@ -17,8 +17,8 @@ logging = tf.logging
 logging.set_verbosity(tf.logging.INFO)
 
 # Model Parameters
-flags.DEFINE_integer('num_epochs', 20, 'Number of epochs to run trainer.')
-flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
+flags.DEFINE_integer('num_epochs', 50, 'Number of epochs to run trainer.')
+flags.DEFINE_float('learning_rate', 0.0001, 'Initial learning rate.')
 flags.DEFINE_integer('batch_size', 128, 'Batch size.')
 flags.DEFINE_float('keep_prob', 0.5, 'The keep probability for lstm dropout.')
 flags.DEFINE_float('beta', 0.001, 'The regularization term for l2 norm.')
@@ -51,8 +51,8 @@ CHECKPOINT_BASENAME = 'model.ckpt'
 def _run_training():
     init = tf.random_uniform_initializer(-0.1, 0.1)
     lr = FLAGS.learning_rate
-    opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
-    # opt = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
+    # opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+    opt = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
 
     with tf.device('/gpu:%d' % FLAGS.gpu):
         with tf.name_scope('Train'):
@@ -89,7 +89,7 @@ def _run_training():
                              save_summaries_secs=120)
 
     with sv.managed_session(config=sess_config) as sess:
-        dev_acc_past = 0
+        # dev_acc_past = 0
         for epoch in xrange(FLAGS.num_epochs):
             if sv.should_stop():
                 break
@@ -109,12 +109,12 @@ def _run_training():
 
             dev_loss, dev_acc = sess.run([dev_model.loss,
                                                   dev_model.accuracy])
-            if dev_acc < dev_acc_past:
-                lr /= 2
-                opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
-                with tf.name_scope('TrainOp'):
-                    train_op = opt.minimize(train_model.loss)
-            dev_acc_past = dev_acc
+            # if dev_acc < dev_acc_past:
+            #     lr /= 2
+            #     opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+            #     with tf.name_scope('TrainOp'):
+            #         train_op = opt.minimize(train_model.loss)
+            # dev_acc_past = dev_acc
 
             logging.info(
                 'train loss for epoch %d is %f, accuracy is %f'
