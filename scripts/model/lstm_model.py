@@ -105,6 +105,8 @@ class LSTM_attention(object):
         return outputs
 
     def _attention(self, lstm_outputs):
+        print(len(lstm_outputs))
+        print(lstm_outputs[0].get_shape())
         with tf.variable_scope('Attention', initializer=self.init):
             weights = tf.get_variable('weights',
                                         [self.lstm_units, self.output_units])
@@ -126,7 +128,7 @@ class LSTM_attention(object):
         for v in scores:
             outputs.append(tf.multiply(scores, lstm_outputs))
 
-        return tf.add_n(outputs, )
+        return tf.add_n(outputs)
 
 
 class WordVec(object):
