@@ -106,14 +106,7 @@ echo "source /aifs/users/rcz56/env/bin/activate">>qsub.sh
 echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64'>>qsub.sh
 echo "python scripts/train/train_normal.py"$py_command>>qsub.sh
 
-host_list=('guangzhou' 'wuhan' 'nanjing' 'jinan')
-
-if [ " ${host_list[@]} " =~ " ${HOST} " ] ; then
-    qsub -cwd -S /bin/bash -o LOG -j y -l hostname=$HOST qsub.sh
-else
-    print_help
-    exit 0
-fi
+qsub -cwd -S /bin/bash -o LOG -j y -l hostname=$HOST qsub.sh
 
 rm qsub.sh
 
