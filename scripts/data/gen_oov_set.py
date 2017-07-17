@@ -25,7 +25,7 @@ def main():
         if not v in word2Idx.keys():
             num_oov += 1
             oov_set.add(v)
-            print('Word ' + v + ' is not the word list!')
+            print('Word <' + v + '> is not in the word list!')
             print('Current number of oov word is: {}'.format(num_oov))
     pickle.dump(oov_set,
                 open(join(pickle_data_dir, sys.argv[1] + '_oov_set.dat'), "wb"),
