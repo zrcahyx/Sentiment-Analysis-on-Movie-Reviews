@@ -46,12 +46,20 @@ config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 saver.restore(sess, 'saved_model/model.ckpt')
 
+coord = tf.train.Coordinator()
+threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+
 test_Sentiment = sess.run(test_model.pred_label)
 test_PhraseId = test_data.PhraseId
 
 submission = pd.DataFrame({'PhraseId':test_PhraseId,
                            'Sentiment':test_Sentiment})
 submission.to_csv('submission.csv', index=False)
+
+coord.request_stop()
+coord.join(threads)
+
+sess.close()
 
 
 
