@@ -83,8 +83,6 @@ def _run_training():
 
     with tf.name_scope('TrainOp'):
         train_op = opt.minimize(train_model.loss)
-    print('Build the graph successfully')
-    input('> ')
 
     sess_config = tf.ConfigProto(allow_soft_placement=True)
     sess_config.gpu_options.allow_growth = True
