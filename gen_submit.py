@@ -32,12 +32,12 @@ with tf.device('/gpu:0'):
             test_data = Input('test')
         with tf.variable_scope('Model', reuse=None):
             test_model = My_model(data = test_data,
-                                        mode='test',
-                                        lstm_units=lstm_units,
-                                        hidden_units=hidden_units,
-                                        output_units=output_units,
-                                        beta=beta,
-                                        keep_prob=keep_prob)
+                                  mode='test',
+                                  lstm_units=lstm_units,
+                                  hidden_units=hidden_units,
+                                  output_units=output_units,
+                                  beta=beta,
+                                  keep_prob=keep_prob)
 saver = tf.train.Saver()
 
 config = tf.ConfigProto(allow_soft_placement=True)
