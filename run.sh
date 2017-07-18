@@ -106,7 +106,7 @@ echo "source /aifs/users/rcz56/env/bin/activate">>qsub.sh
 echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64'>>qsub.sh
 echo "python scripts/train/train_normal.py"$py_command>>qsub.sh
 
-qsub -cwd -S /bin/bash -o LOG1 -j y -l hostname=$HOST qsub.sh
+qsub -cwd -S /bin/bash -o LOG -j y -l hostname=$HOST qsub.sh
 
 rm qsub.sh
 
