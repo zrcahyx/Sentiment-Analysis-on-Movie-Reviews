@@ -9,7 +9,7 @@ import tensorflow as tf
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 from data.decode_tfrecords import read_and_decode
-from model.lstm_model import LSTM_attention, Input
+from model.my_model import My_model, Input
 from util import get_num_records, get_cfg_path
 
 flags = tf.flags
@@ -62,7 +62,7 @@ def _run_training():
             with tf.name_scope('TrainInput'):
                 train_data = Input('train')
             with tf.variable_scope('Model', reuse=None):
-                train_model = LSTM_attention(data = train_data,
+                train_model = My_model(data = train_data,
                                              mode='train',
                                              lstm_units=FLAGS.lstm_units,
                                              hidden_units=hidden_units,
@@ -75,7 +75,7 @@ def _run_training():
             with tf.name_scope('DevInput'):
                 dev_data = Input('dev')
             with tf.variable_scope('Model', reuse=True):
-                dev_model = LSTM_attention(data = dev_data,
+                dev_model = My_model(data = dev_data,
                                            mode='dev',
                                            lstm_units=FLAGS.lstm_units,
                                            hidden_units=hidden_units,

@@ -18,7 +18,7 @@ from data.decode_tfrecords import read_and_decode
 from util import get_num_records, get_cfg_path
 
 
-class LSTM_attention(object):
+class My_model(object):
     """ LSTM based DST model. """
 
     def __init__(self,

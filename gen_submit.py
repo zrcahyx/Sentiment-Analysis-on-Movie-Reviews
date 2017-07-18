@@ -11,7 +11,7 @@ import tensorflow as tf
 
 sys.path.append(join(dirname(abspath(__file__)), 'scripts'))
 from data.decode_tfrecords import read_and_decode
-from model.lstm_model import LSTM_attention, Input
+from model.my_model import My_model, Input
 from util import get_num_records, get_cfg_path
 
 cf = ConfigParser.ConfigParser()
@@ -33,7 +33,7 @@ with tf.device('/gpu:0'):
         with tf.name_scope('TestInput'):
             test_data = Input('test')
         with tf.variable_scope('Model', reuse=None):
-            test_model = LSTM_attention(data = test_data,
+            test_model = My_model(data = test_data,
                                         mode='test',
                                         lstm_units=lstm_units,
                                         hidden_units=hidden_units,
