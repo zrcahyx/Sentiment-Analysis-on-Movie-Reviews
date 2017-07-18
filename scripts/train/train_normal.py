@@ -52,7 +52,6 @@ hidden_units=[int(x) for x in FLAGS.hidden_units.split(',')]
 
 
 def _run_training():
-    init = tf.random_uniform_initializer(-0.1, 0.1)
     lr = FLAGS.learning_rate
     # opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
     opt = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
@@ -63,29 +62,29 @@ def _run_training():
                 train_data = Input('train')
             with tf.variable_scope('Model', reuse=None):
                 train_model = My_model(data = train_data,
-                                             mode='train',
-                                             lstm_units=FLAGS.lstm_units,
-                                             hidden_units=hidden_units,
-                                             output_units=FLAGS.output_units,
-                                             init = init,
-                                             beta=FLAGS.beta,
-                                             keep_prob=FLAGS.keep_prob)
+                                       mode='train',
+                                       lstm_units=FLAGS.lstm_units,
+                                       hidden_units=hidden_units,
+                                       output_units=FLAGS.output_units,
+                                       beta=FLAGS.beta,
+                                       keep_prob=FLAGS.keep_prob)
 
         with tf.name_scope('Dev'):
             with tf.name_scope('DevInput'):
                 dev_data = Input('dev')
             with tf.variable_scope('Model', reuse=True):
                 dev_model = My_model(data = dev_data,
-                                           mode='dev',
-                                           lstm_units=FLAGS.lstm_units,
-                                           hidden_units=hidden_units,
-                                           output_units=FLAGS.output_units,
-                                           init = init,
-                                           beta=FLAGS.beta,
-                                           keep_prob=FLAGS.keep_prob)
+                                     mode='dev',
+                                     lstm_units=FLAGS.lstm_units,
+                                     hidden_units=hidden_units,
+                                     output_units=FLAGS.output_units,
+                                     beta=FLAGS.beta,
+                                     keep_prob=FLAGS.keep_prob)
 
     with tf.name_scope('TrainOp'):
         train_op = opt.minimize(train_model.loss)
+    print('Build the graph successfully')
+    input('> ')
 
     sess_config = tf.ConfigProto(allow_soft_placement=True)
     sess_config.gpu_options.allow_growth = True

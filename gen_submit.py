@@ -25,8 +25,6 @@ beta = cf.getfloat('Model', 'beta')
 keep_prob = cf.getfloat('Model', 'keep_prob')
 save_path = cf.get('Model', 'save_path')
 
-init = tf.random_uniform_initializer(-0.1, 0.1)
-opt = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
 with tf.device('/gpu:0'):
     with tf.name_scope('Test'):
@@ -38,7 +36,6 @@ with tf.device('/gpu:0'):
                                         lstm_units=lstm_units,
                                         hidden_units=hidden_units,
                                         output_units=output_units,
-                                        init = init,
                                         beta=beta,
                                         keep_prob=keep_prob)
 saver = tf.train.Saver()

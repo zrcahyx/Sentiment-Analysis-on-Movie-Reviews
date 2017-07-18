@@ -12,6 +12,8 @@ from tensorflow import nn
 from tensorflow.contrib import rnn
 from tensorflow.contrib import layers
 from tensorflow import GraphKeys
+from tensorflow.contrib.layers import xavier_initializer
+from tensorflow import zeros_initializer
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 from data.decode_tfrecords import read_and_decode
@@ -27,27 +29,39 @@ class My_model(object):
                  lstm_units,
                  hidden_units,
                  output_units,
-                 init,
-                 beta=0.0001,
-                 keep_prob=0.7):
+                 beta=0.005,
+                 keep_prob=0.5):
+        cf = ConfigParser.ConfigParser()
+        cf.read(get_cfg_path())
         self.data = data
         self.mode = mode
         self.lstm_units = lstm_units
         # a list lstm-attention-fc-output
         self.hidden_units = hidden_units
         self.output_units = output_units
-        self.init = init
         self.beta = beta
         self.keep_prob = keep_prob
         self.regularizer = layers.l2_regularizer(scale=self.beta)
+        self.seq_len = cf.getint('Data', self.mode + '_seq_len')
 
-        with tf.name_scope('RNN'):
-            lstm_outputs = self._rnn(data.input)
+        with tf.name_scope('Look_up'):
+            word_vec = self._look_up(data.input)
 
-        with tf.name_scope('Attention'):
-            attention_output = self._attention(lstm_outputs)
+        with tf.name_scope('RNN_Attention'):
+            rnn_attention_feature = self._rnn_attention(word_vec)
 
-        pred = self._full_connected(attention_output)
+        with tf.name_scope('CNN'):
+            cnn_feature = self._cnn(word_vec, [2,3,4,5], kernels=10)
+
+        with tf.name_scope('ConFeatures'):
+            features = tf.concat([rnn_attention_feature, cnn_feature],
+                                 axis=1, name="features")
+
+        with tf.name_scope('Dropout'):
+            features = nn.dropout(features, keep_prob=self.keep_prob,
+                                  name='dropout')
+
+        pred = self._full_connected(rnn_attention_feature)
         self.pred = nn.softmax(pred)
         self.pred_label = tf.argmax(pred, 1)
 
@@ -76,7 +90,7 @@ class My_model(object):
             self.accuracy = accuracy
             tf.summary.scalar('accuracy', self.accuracy)
 
-    def _rnn(self, x):
+    def _look_up(self, x):
         word_idx = x
         word_idx = tf.cast(word_idx, tf.int32)
         init_embedding = tf.constant(WordVec.word_vecs)
@@ -84,12 +98,15 @@ class My_model(object):
             embeddings = tf.get_variable('embeddings',
                                          initializer=init_embedding)
         word_vec = nn.embedding_lookup(embeddings, word_idx)
+        return word_vec
+
+    def _rnn_attention(self, word_vec):
         input = tf.unstack(word_vec, axis=1)
 
         lstm_cell = rnn.LSTMCell(self.lstm_units,
                                  use_peepholes=True,
                                  forget_bias=1.0,
-                                 initializer=self.init)
+                                 initializer=None)
 
         if self.mode == 'train':
             keep_prob = self.keep_prob
@@ -100,16 +117,17 @@ class My_model(object):
                                                input_keep_prob=keep_prob,
                                                output_keep_prob=keep_prob)
 
-        outputs, states = rnn.static_rnn(lstm_cell, input, dtype=tf.float32)
+        lstm_outputs, states = rnn.static_rnn(lstm_cell, input, dtype=tf.float32)
 
-        return outputs
-
-    def _attention(self, lstm_outputs):
-        with tf.variable_scope('Attention', initializer=self.init):
-            weights = tf.get_variable('weights',
-                                      [self.lstm_units, self.output_units],
-                                      regularizer=self.regularizer)
-            biases = tf.get_variable('biases', [1, self.output_units])
+        with tf.variable_scope('Attention'):
+            weights = tf.get_variable(
+                        'weights',
+                        [self.lstm_units, self.output_units],
+                        regularizer=self.regularizer,
+                        initializer=xavier_initializer(uniform=False))
+            biases = tf.get_variable('biases',
+                                     [1, self.output_units],
+                                     initializer=zeros_initializer())
             u_w = tf.get_variable('u_w', [self.output_units, 1])
 
         outputs, scores = [], []
@@ -134,34 +152,76 @@ class My_model(object):
 
         return tf.add_n(outputs)
 
+    def _cnn(self, word_vec, ngrams=[2,3,4,5], kernels=10):
+        cf = ConfigParser.ConfigParser()
+        cf.read(get_cfg_path())
+        word_dim = cf.getint('Data', 'word_dim')
+        # NHWC format
+        word_vec = tf.reshape(word_vec, [-1, -1, -1, 1])
+        cnn_feature = []
+        for i, v in enumerate(ngrams):
+            with tf.variable_scope('conv_{}'.format(v)):
+                weights = tf.get_variable(
+                                'weights',
+                                [v, word_dim, 1, kernels],
+                                regularizer=self.regularizer,
+                                initializer=xavier_initializer(uniform=False))
+                biases = tf.get_variable('biases',
+                                         [kernels],
+                                         initializer=zeros_initializer())
+            # batch_size x H x 1 x kernels
+            conv = nn.conv2d(word_vec, weights,
+                             strides=[1,1,1,1],padding='VALID')
+            # batch_size x H x 1 x kernels
+            conv_relu = nn.relu(conv + biases)
+            H = self.seq_len - v + 1
+            # batch_size x 1 x 1 x kernels
+            conv_relu_pooling = nn.max_pool(conv_relu, ksize=[1, H, 1, 1],
+                                            strides=[1,1,1,1], padding='VALID')
+            feature = tf.reshape(conv_relu_pooling, [-1, kernels])
+            cnn_feature.append(feature)
+        cnn_feature = tf.concat(cnn_feature, axis=1)
+        return cnn_feature
+
     def _full_connected(self, attention_output):
         hu = self.hidden_units
         for i in xrange(len(hu) + 1):
-            with tf.variable_scope('Affine' + str(i + 1),
-                                   initializer=self.init):
+            with tf.variable_scope('Affine' + str(i + 1)):
                 if i == 0:
-                    weights = tf.get_variable('weights',
-                                              [self.lstm_units, hu[i]],
-                                              regularizer=self.regularizer)
-                    biases = tf.get_variable('biases', [hu[i]])
+                    weights = tf.get_variable(
+                                'weights',
+                                [self.lstm_units, hu[i]],
+                                regularizer=self.regularizer,
+                                initializer=xavier_initializer(uniform=False))
+                    biases = tf.get_variable('biases',
+                                             [hu[i]],
+                                             initializer=zeros_initializer())
                     hidden_output = tf.add(tf.matmul(attention_output, weights),
                                            biases,
                                            name='hidden_output')
                 elif i == len(hu):
-                    weights = tf.get_variable('weights',
-                                              [hu[i - 1], self.output_units],
-                                              regularizer=self.regularizer)
-                    biases = tf.get_variable('biases', [self.output_units])
+                    weights = tf.get_variable(
+                                'weights',
+                                [hu[i - 1], self.output_units],
+                                regularizer=self.regularizer,
+                                initializer=xavier_initializer(uniform=False))
+                    biases = tf.get_variable('biases',
+                                             [self.output_units],
+                                             initializer=zeros_initializer())
                     with tf.name_scope('Pred'):
                         pred = tf.add(tf.matmul(hidden_output, weights),
                                       biases,
                                       name='pred')
                     return pred
                 else:
-                    weights = tf.get_variable('weights',
-                                              [hu[i - 1], hu[i]],
-                                              regularizer=self.regularizer)
-                    biases = tf.get_variable('biases', [hu[i]])
+                    weights = tf.get_variable(
+                                'weights',
+                                [hu[i - 1], hu[i]],
+                                regularizer=self.regularizer,
+                                initializer=xavier_initializer(uniform=False))
+                    biases = tf.get_variable('biases',
+                                             [hu[i]],
+                                             initializer=zeros_initializer())
                     hidden_output = tf.add(tf.matmul(hidden_output, weights),
                                            biases,
                                            name='hidden_output')
