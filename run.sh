@@ -10,7 +10,8 @@ function print_help()
     ./run.sh -h <host_name>  -g <gpu_id> -sp <save_path>
              -lg <log_path> -ne <num_epochs> -lr <learning_rate>
              -bs <batch_size> -kp <keep_prob> -beta <beta>
-             -lu <lstm_units>
+             -lu <lstm_units> -cf <cnn_flag> -ck <cnn_kernels>
+             -cn <cnn_ngrams> -rf <rnn_flag>
 
     host_name:
         guangzhou, wuhan, nanjing
@@ -40,7 +41,19 @@ function print_help()
         The regularization term for l2 norm.
 
     lstm_units:
-        lstm output units.
+        Lstm output units.
+
+    cnn_flag:
+        Use cnn feature or not.
+
+    cnn_kernels:
+        CNN filter number.
+
+    cnn_ngrams:
+        CNN filter size.
+
+    rnn_flag:
+        Use rnn feature or not.
 
     log file: LOG
 
@@ -98,6 +111,22 @@ case $key in
     shift # past argument
     ;;
     -lu|--lstm_units)
+    py_command=$py_command" --lstm_units=""$2"
+    shift # past argument
+    ;;
+    -cf|--cnn_flag)
+    py_command=$py_command" --cnn_flag=""$2"
+    shift # past argument
+    ;;
+    -ck|--cnn_kernels)
+    py_command=$py_command" --lstm_units=""$2"
+    shift # past argument
+    ;;
+    -cn|--cnn_ngrams)
+    py_command=$py_command" --lstm_units=""$2"
+    shift # past argument
+    ;;
+    -rf|--rnn_flag)
     py_command=$py_command" --lstm_units=""$2"
     shift # past argument
     ;;

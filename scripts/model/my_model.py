@@ -27,6 +27,10 @@ class My_model(object):
                  data,
                  mode,
                  lstm_units,
+                 cnn_flag,
+                 cnn_kernels,
+                 cnn_ngrams,
+                 rnn_flag,
                  hidden_units,
                  output_units,
                  beta=0.005,
@@ -36,6 +40,10 @@ class My_model(object):
         self.data = data
         self.mode = mode
         self.lstm_units = lstm_units
+        self.cnn_kernels = cnn_kernels
+        self.cnn_ngrams = cnn_ngrams
+        self.cnn_flag = cnn_flag
+        self.rnn_flag = rnn_flag
         # a list lstm-attention-fc-output
         self.hidden_units = hidden_units
         self.output_units = output_units
@@ -47,21 +55,37 @@ class My_model(object):
         with tf.name_scope('Look_up'):
             word_vec = self._look_up(data.input)
 
-        with tf.name_scope('RNN_Attention'):
-            rnn_attention_feature = self._rnn_attention(word_vec)
+        if self.rnn_flag:
+            with tf.name_scope('RNN_Attention'):
+                rnn_attention_feature = self._rnn_attention(word_vec)
 
-        with tf.name_scope('CNN'):
-            cnn_feature = self._cnn(word_vec, [2,3,4,5,6], kernels=20)
+        if self.cnn_flag:
+            with tf.name_scope('CNN'):
+                cnn_feature = self._cnn(word_vec)
 
-        with tf.name_scope('ConFeatures'):
-            features = tf.concat([rnn_attention_feature, cnn_feature],
-                                 axis=1, name="features")
+        if self.cnn_flag and self.rnn_flag:
+            with tf.name_scope('ConFeatures'):
+                features = tf.concat([rnn_attention_feature, cnn_feature],
+                                    axis=1, name="features")
+            self.feature_dim = (self.cnn_kernels * len(self.cnn_ngrams) +
+                                self.lstm_units)
+        elif not self.cnn_flag:
+            features = rnn_attention_feature
+            self.feature_dim = self.lstm_units
+        elif not self.rnn_flag:
+            features = cnn_feature
+            self.feature_dim = self.cnn_kernels * len(self.cnn_ngrams)
+
+        if self.mode == 'train':
+            keep_prob = self.keep_prob
+        else:
+            keep_prob = 1.0
 
         with tf.name_scope('Dropout'):
-            features = nn.dropout(features, keep_prob=self.keep_prob,
+            features = nn.dropout(features, keep_prob=keep_prob,
                                   name='dropout')
 
-        pred = self._full_connected(rnn_attention_feature)
+        pred = self._full_connected(features)
         self.pred = nn.softmax(pred)
         self.pred_label = tf.argmax(pred, 1)
 
@@ -152,22 +176,22 @@ class My_model(object):
 
         return tf.add_n(outputs)
 
-    def _cnn(self, word_vec, ngrams=[2,3,4,5], kernels=10):
+    def _cnn(self, word_vec):
         cf = ConfigParser.ConfigParser()
         cf.read(get_cfg_path())
         word_dim = cf.getint('Data', 'word_dim')
         # NHWC format
         word_vec = tf.reshape(word_vec, [-1, -1, -1, 1])
         cnn_feature = []
-        for i, v in enumerate(ngrams):
+        for i, v in enumerate(self.cnn_ngrams):
             with tf.variable_scope('conv_{}'.format(v)):
                 weights = tf.get_variable(
                                 'weights',
-                                [v, word_dim, 1, kernels],
+                                [v, word_dim, 1, self.cnn_kernels],
                                 regularizer=self.regularizer,
                                 initializer=xavier_initializer(uniform=False))
                 biases = tf.get_variable('biases',
-                                         [kernels],
+                                         [self.cnn_kernels],
                                          initializer=zeros_initializer())
             # batch_size x H x 1 x kernels
             conv = nn.conv2d(word_vec, weights,
@@ -178,53 +202,71 @@ class My_model(object):
             # batch_size x 1 x 1 x kernels
             conv_relu_pooling = nn.max_pool(conv_relu, ksize=[1, H, 1, 1],
                                             strides=[1,1,1,1], padding='VALID')
-            feature = tf.reshape(conv_relu_pooling, [-1, kernels])
+            feature = tf.reshape(conv_relu_pooling, [-1, self.cnn_kernels])
             cnn_feature.append(feature)
         cnn_feature = tf.concat(cnn_feature, axis=1)
         return cnn_feature
 
-    def _full_connected(self, attention_output):
-        hu = self.hidden_units
-        for i in xrange(len(hu) + 1):
-            with tf.variable_scope('Affine' + str(i + 1)):
-                if i == 0:
-                    weights = tf.get_variable(
-                                'weights',
-                                [self.lstm_units, hu[i]],
-                                regularizer=self.regularizer,
-                                initializer=xavier_initializer(uniform=False))
-                    biases = tf.get_variable('biases',
-                                             [hu[i]],
-                                             initializer=zeros_initializer())
-                    hidden_output = tf.add(tf.matmul(attention_output, weights),
-                                           biases,
-                                           name='hidden_output')
-                elif i == len(hu):
-                    weights = tf.get_variable(
-                                'weights',
-                                [hu[i - 1], self.output_units],
-                                regularizer=self.regularizer,
-                                initializer=xavier_initializer(uniform=False))
-                    biases = tf.get_variable('biases',
-                                             [self.output_units],
-                                             initializer=zeros_initializer())
-                    with tf.name_scope('Pred'):
-                        pred = tf.add(tf.matmul(hidden_output, weights),
-                                      biases,
-                                      name='pred')
-                    return pred
-                else:
-                    weights = tf.get_variable(
-                                'weights',
-                                [hu[i - 1], hu[i]],
-                                regularizer=self.regularizer,
-                                initializer=xavier_initializer(uniform=False))
-                    biases = tf.get_variable('biases',
-                                             [hu[i]],
-                                             initializer=zeros_initializer())
-                    hidden_output = tf.add(tf.matmul(hidden_output, weights),
-                                           biases,
-                                           name='hidden_output')
+    def _full_connected(self, features):
+        if self.hidden_units:
+            hu = self.hidden_units
+            for i in xrange(len(hu) + 1):
+                with tf.variable_scope('Affine' + str(i + 1)):
+                    if i == 0:
+                        weights = tf.get_variable(
+                                    'weights',
+                                    [self.feature_dim, hu[i]],
+                                    regularizer=self.regularizer,
+                                    initializer=xavier_initializer(uniform=False))
+                        biases = tf.get_variable(
+                                    'biases',
+                                    [hu[i]],
+                                    initializer=zeros_initializer())
+                        hidden_output = tf.add(
+                                            tf.matmul(features, weights),
+                                            biases,
+                                            name='hidden_output')
+                    elif i == len(hu):
+                        weights = tf.get_variable(
+                                    'weights',
+                                    [hu[i - 1], self.output_units],
+                                    regularizer=self.regularizer,
+                                    initializer=xavier_initializer(uniform=False))
+                        biases = tf.get_variable('biases',
+                                                 [self.output_units],
+                                                 initializer=zeros_initializer())
+                        with tf.name_scope('Pred'):
+                            pred = tf.add(tf.matmul(hidden_output, weights),
+                                        biases,
+                                        name='pred')
+                        return pred
+                    else:
+                        weights = tf.get_variable(
+                                    'weights',
+                                    [hu[i - 1], hu[i]],
+                                    regularizer=self.regularizer,
+                                    initializer=xavier_initializer(uniform=False))
+                        biases = tf.get_variable('biases',
+                                                [hu[i]],
+                                                initializer=zeros_initializer())
+                        hidden_output = tf.add(tf.matmul(hidden_output, weights),
+                                            biases,
+                                            name='hidden_output')
+        elif not self.hidden_units:
+            with tf.variable_scope('Affine'):
+                weights = tf.get_variable(
+                            'weights',
+                            [self.feature_dim, self.output_units],
+                            regularizer=self.regularizer,
+                            initializer=xavier_initializer(uniform=False))
+                biases = tf.get_variable('biases',
+                                         [self.output_units],
+                                         initializer=zeros_initializer())
+            with tf.name_scope('Pred'):
+                pred = tf.add(tf.matmul(features, weights),
+                              biases,
+                              name='pred')
+            return pred
 
 
 class WordVec(object):

@@ -20,10 +20,14 @@ logging.set_verbosity(tf.logging.INFO)
 flags.DEFINE_integer('num_epochs', 20, 'Number of epochs to run trainer.')
 flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
 flags.DEFINE_integer('batch_size', 128, 'Batch size.')
-flags.DEFINE_float('keep_prob', 0.4, 'The keep probability for lstm dropout.')
-flags.DEFINE_float('beta', 0.01, 'The regularization term for l2 norm.')
+flags.DEFINE_float('keep_prob', 0.5, 'The keep probability for lstm dropout.')
+flags.DEFINE_float('beta', 0.001, 'The regularization term for l2 norm.')
 flags.DEFINE_integer('lstm_units', 100, 'lstm output units.')
-flags.DEFINE_string('hidden_units', '64', 'hidden units.')
+flags.DEFINE_integer('cnn_flag', 1, 'Use cnn feature or not.')
+flags.DEFINE_integer('cnn_kernels', 25, 'How many filters to use for CNN.')
+flags.DEFINE_string('cnn_ngrams', '2,3,4,5', 'cnn filter size.')
+flags.DEFINE_integer('rnn_flag', 1, 'Use rnn feature or not.')
+flags.DEFINE_string('hidden_units', '0', 'hidden units.')
 flags.DEFINE_integer('output_units', 5, 'output units.')
 
 # Other Parameters
@@ -39,6 +43,10 @@ cf.read(get_cfg_path())
 cf.set('Model', 'learning_rate', FLAGS.learning_rate)
 cf.set('Model', 'batch_size', FLAGS.batch_size)
 cf.set('Model', 'lstm_units', FLAGS.lstm_units)
+cf.set('Model', 'cnn_flag', FLAGS.cnn_flag)
+cf.set('Model', 'cnn_kernels', FLAGS.cnn_kernels)
+cf.set('Model', 'cnn_ngrams', FLAGS.cnn_ngrams)
+cf.set('Model', 'rnn_flag', FLAGS.rnn_flag)
 cf.set('Model', 'hidden_units', FLAGS.hidden_units)
 cf.set('Model', 'output_units', FLAGS.output_units)
 cf.set('Model', 'beta', FLAGS.beta)
@@ -47,8 +55,15 @@ cf.set('Model', 'save_path', FLAGS.save_path)
 with open(get_cfg_path(), 'w') as f:
         cf.write(f)
 
+if FLAGS.hidden_units == '0':
+    hidden_units = []
+else:
+    hidden_units=[int(x) for x in FLAGS.hidden_units.split(',')]
+
+cnn_ngrams = [int(x) for x in FLAGS.cnn_ngrams.split(',')]
+
+
 CHECKPOINT_BASENAME = 'model.ckpt'
-hidden_units=[int(x) for x in FLAGS.hidden_units.split(',')]
 
 
 def _run_training():
@@ -64,6 +79,10 @@ def _run_training():
                 train_model = My_model(data = train_data,
                                        mode='train',
                                        lstm_units=FLAGS.lstm_units,
+                                       cnn_flag=FLAGS.cnn_flag,
+                                       cnn_kernels=FLAGS.cnn_kernels,
+                                       cnn_ngrams=cnn_ngrams,
+                                       rnn_flag=FLAGS.rnn_flag,
                                        hidden_units=hidden_units,
                                        output_units=FLAGS.output_units,
                                        beta=FLAGS.beta,
@@ -76,6 +95,10 @@ def _run_training():
                 dev_model = My_model(data = dev_data,
                                      mode='dev',
                                      lstm_units=FLAGS.lstm_units,
+                                     cnn_flag=FLAGS.cnn_flag,
+                                     cnn_kernels=FLAGS.cnn_kernels,
+                                     cnn_ngrams=cnn_ngrams,
+                                     rnn_flag=FLAGS.rnn_flag,
                                      hidden_units=hidden_units,
                                      output_units=FLAGS.output_units,
                                      beta=FLAGS.beta,
