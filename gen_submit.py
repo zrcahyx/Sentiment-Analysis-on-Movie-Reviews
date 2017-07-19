@@ -53,14 +53,14 @@ test_PhraseId = sess.run(test_data.PhraseId)
 
 submission = pd.DataFrame({'PhraseId':test_PhraseId,
                            'Sentiment':test_Sentiment})
-submission.to_csv('submission.csv', index=False)
+submission.to_csv(save_path + '.csv', index=False)
 
 coord.request_stop()
 coord.join(threads)
 
 sess.close()
 
-print('The submission.csv file is generated!')
+print('The ' + save_path + '.csv ' + 'file is generated!')
 
 
 
