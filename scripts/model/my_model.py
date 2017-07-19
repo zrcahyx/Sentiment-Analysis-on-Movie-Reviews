@@ -33,8 +33,8 @@ class My_model(object):
                  rnn_flag,
                  hidden_units,
                  output_units,
-                 beta=0.005,
-                 keep_prob=0.5):
+                 beta,
+                 keep_prob):
         cf = ConfigParser.ConfigParser()
         cf.read(get_cfg_path())
         self.data = data
