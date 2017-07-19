@@ -1,4 +1,5 @@
 ./getEmbedding.py
+./getGloveEmbedding.py 50
 ./mkTrainDevdata.py
 ./mkTestdata.py
 ./gen_oov_set.py train
