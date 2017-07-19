@@ -23,7 +23,7 @@ hidden_units=[int(x) for x in hidden_units.split(',')]
 output_units = cf.getint('Model', 'output_units')
 beta = cf.getfloat('Model', 'beta')
 keep_prob = cf.getfloat('Model', 'keep_prob')
-save_path = cf.get('Model', 'save_path')
+save_path = sys.argv[1]
 
 
 with tf.device('/gpu:0'):
@@ -43,7 +43,7 @@ saver = tf.train.Saver()
 config = tf.ConfigProto(allow_soft_placement=True)
 config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
-saver.restore(sess, 'saved_model/model.ckpt')
+saver.restore(sess, join(save_path, 'model.ckpt')
 
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
