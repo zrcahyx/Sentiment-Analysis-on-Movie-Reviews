@@ -24,10 +24,10 @@ flags.DEFINE_float('keep_prob', 0.5, 'The keep probability for lstm dropout.')
 flags.DEFINE_float('beta', 0.001, 'The regularization term for l2 norm.')
 flags.DEFINE_integer('lstm_units', 100, 'lstm output units.')
 flags.DEFINE_integer('cnn_flag', 1, 'Use cnn feature or not.')
-flags.DEFINE_integer('cnn_kernels', 100, 'How many filters to use for CNN.')
-flags.DEFINE_string('cnn_ngrams', '3,4,5', 'cnn filter size.')
+flags.DEFINE_integer('cnn_kernels', 80, 'How many filters to use for CNN.')
+flags.DEFINE_string('cnn_ngrams', '2,3,4,5', 'cnn filter size.')
 flags.DEFINE_integer('rnn_flag', 1, 'Use rnn feature or not.')
-flags.DEFINE_string('hidden_units', '0', 'hidden units.')
+flags.DEFINE_string('hidden_units', '100', 'hidden units.')
 flags.DEFINE_integer('output_units', 5, 'output units.')
 
 # Other Parameters
