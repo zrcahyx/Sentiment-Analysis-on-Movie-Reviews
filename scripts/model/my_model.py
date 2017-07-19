@@ -51,7 +51,7 @@ class My_model(object):
             rnn_attention_feature = self._rnn_attention(word_vec)
 
         with tf.name_scope('CNN'):
-            cnn_feature = self._cnn(word_vec, [2,3,4,5], kernels=10)
+            cnn_feature = self._cnn(word_vec, [2,3,4,5,6], kernels=20)
 
         with tf.name_scope('ConFeatures'):
             features = tf.concat([rnn_attention_feature, cnn_feature],
