@@ -8,7 +8,7 @@ function print_help()
     local usage="
     Usage: \n
     ./run.sh -h <host_name>  -g <gpu_id> -sp <save_path>
-             -ne <num_epochs> -lr <learning_rate>
+             -lg <log_path> -ne <num_epochs> -lr <learning_rate>
              -bs <batch_size> -kp <keep_prob> -beta <beta>
              -lu <lstm_units>
 
@@ -20,6 +20,9 @@ function print_help()
 
     save_path:
         Model output base directory.
+
+    log_path:
+        Log path to be saved.
 
     num_epochs:
         Number of epochs to run trainer.
@@ -70,6 +73,10 @@ case $key in
     py_command=$py_command" --save_path=""$2"
     shift # past argument
     ;;
+    -lg|--log_path)
+    LOGPATH="$2"
+    shift # past argument
+    ;;
     -ne|--num_epochs)
     py_command=$py_command" --num_epochs=""$2"
     shift # past argument
@@ -106,7 +113,7 @@ echo "source /aifs/users/rcz56/env/bin/activate">>qsub.sh
 echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64'>>qsub.sh
 echo "python scripts/train/train_normal.py"$py_command>>qsub.sh
 
-qsub -cwd -S /bin/bash -o LOG1 -j y -l hostname=$HOST qsub.sh
+qsub -cwd -S /bin/bash -o $LOGPATH -j y -l hostname=$HOST qsub.sh
 
 rm qsub.sh
 
