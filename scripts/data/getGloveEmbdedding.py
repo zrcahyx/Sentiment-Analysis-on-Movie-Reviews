@@ -14,7 +14,7 @@ def main():
     word_vec_dir = join(dirname(dirname(dirname(abspath(__file__)))),
                         'data',
                         'word_vec')
-    embedding_path = join(word_vec_dir, 'glove.6B.50d.txt')
+    embedding_path = join(word_vec_dir, 'glove.6B.' + sys.argv[1] + 'd.txt')
 
     wordNum = get_file_num_line(embedding_path)
     print('Word list size is {}'.format(wordNum))
