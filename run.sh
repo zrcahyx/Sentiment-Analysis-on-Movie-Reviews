@@ -119,15 +119,15 @@ case $key in
     shift # past argument
     ;;
     -ck|--cnn_kernels)
-    py_command=$py_command" --lstm_units=""$2"
+    py_command=$py_command" --cnn_kernels=""$2"
     shift # past argument
     ;;
     -cn|--cnn_ngrams)
-    py_command=$py_command" --lstm_units=""$2"
+    py_command=$py_command" --cnn_ngrams=""$2"
     shift # past argument
     ;;
     -rf|--rnn_flag)
-    py_command=$py_command" --lstm_units=""$2"
+    py_command=$py_command" --rnn_flag=""$2"
     shift # past argument
     ;;
     *)

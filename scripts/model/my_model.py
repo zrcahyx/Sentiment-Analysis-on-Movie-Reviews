@@ -158,7 +158,7 @@ class My_model(object):
         for v in lstm_outputs:
             hidden_rep = nn.tanh(tf.add(tf.matmul(v, weights), biases))
             scores.append(tf.matmul(hidden_rep, u_w))
-        # list -> tensor
+        # list -> tensor batch_size x seq_len
         scores = tf.concat(scores, axis=1)
         # softmax
         scores = nn.softmax(scores, dim=-1)
@@ -181,7 +181,7 @@ class My_model(object):
         cf.read(get_cfg_path())
         word_dim = cf.getint('Data', 'word_dim')
         # NHWC format
-        word_vec = tf.reshape(word_vec, [-1, -1, -1, 1])
+        word_vec = tf.reshape(word_vec, [-1, self.seq_len, word_dim, 1])
         cnn_feature = []
         for i, v in enumerate(self.cnn_ngrams):
             with tf.variable_scope('conv_{}'.format(v)):
