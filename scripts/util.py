@@ -27,18 +27,6 @@ def oov_word_proc(oov):
     # number -> 0
     if re.match('\d+', oov):
         return ['0']
-    # xxxly -> xxx
-    if re.match('.+ly', oov):
-        return [oov[:-2]]
-    # xxxtted -> xxxt
-    if re.match('.+tted', oov):
-        return [oov[:-3]]
-    # xxxed -> xxx
-    if re.match('.+ed', oov):
-        return [oov[:-2]]
-    # unxxx -> not xxx
-    if re.match('un.+', oov):
-        return ['not', oov[2:]]
     # xxx\\/xxx
     if re.match('.+\\/.+', oov):
         return oov.split('\\/')

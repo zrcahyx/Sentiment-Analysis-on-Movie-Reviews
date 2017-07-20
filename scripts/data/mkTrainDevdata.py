@@ -6,7 +6,7 @@ from os.path import dirname, abspath, join
 import sys
 import ConfigParser
 import cPickle as pickle
-import re
+import re, random
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 from util import get_cfg_path, get_file_num_line, oov_word_proc
@@ -27,14 +27,7 @@ def main():
     file_path = join(tsv_data_dir, 'train.tsv')
 
     total_examples = get_file_num_line(file_path) - 1
-    train_examples = int(total_examples * 0.8)
-    print('Number of phrase for train dataset is {}'.format(train_examples))
-    dev_examples = total_examples - train_examples
-    print('Number of phrase for dev dataset is {}'.format(dev_examples))
-    cf = ConfigParser.ConfigParser()
-    cf.read(get_cfg_path())
-    cf.set('Data', 'train_num_phrase', train_examples)
-    cf.set('Data', 'dev_num_phrase', dev_examples)
+    train_examples, dev_examples = 0, 0
 
     line_idx = 0
     with open(file_path, 'r') as f:
@@ -69,27 +62,27 @@ def main():
                                 input_idx.append(word2Idx['unknown'])
             example['input'] = np.array(input_idx)
 
-            if line_idx <= train_examples:
+            random_value = random.random()
+            if random_value <= 0.9:
                 train_data.append(example)
+                train_examples += 1
                 for v in input_str:
                     train_word_set.add(v)
             else:
                 dev_data.append(example)
+                dev_examples += 1
                 for v in input_str:
                     dev_word_set.add(v)
             print('Line {} processing is done!'.format(line_idx))
             line_idx += 1
 
-    train_num_sentence = (train_data[-1]['SentenceId'] -
-                            train_data[0]['SentenceId'] +
-                            1)
-    print('Number of sentences for train dataset is {}'.format(train_num_sentence))
-    dev_num_sentence = (dev_data[-1]['SentenceId'] -
-                            dev_data[0]['SentenceId'] +
-                            1)
-    print('Number of sentences for dev dataset is {}'.format(dev_num_sentence))
-    cf.set('Data', 'train_num_sentence', train_num_sentence)
-    cf.set('Data', 'dev_num_sentence', dev_num_sentence)
+    print('Number of examples for train dataset is {}'.format(train_examples))
+    dev_examples = total_examples - train_examples
+    print('Number of examples for dev dataset is {}'.format(dev_examples))
+    cf = ConfigParser.ConfigParser()
+    cf.read(get_cfg_path())
+    cf.set('Data', 'train_num_phrase', train_examples)
+    cf.set('Data', 'dev_num_phrase', dev_examples)
 
     print('Number of different words for train dataset is {}'.format(len(train_word_set)))
     print('Number of different words for dev dataset is {}'.format(len(dev_word_set)))
