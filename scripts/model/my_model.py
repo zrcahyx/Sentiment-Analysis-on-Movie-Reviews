@@ -88,7 +88,7 @@ class My_model(object):
 
         logits = self._full_connected(features)
         self.pred = nn.softmax(logits)
-        self.pred_label = tf.argmax(pred, 1)
+        self.pred_label = tf.argmax(logits, 1)
 
         if self.mode != 'test':
             with tf.name_scope('Label'):
