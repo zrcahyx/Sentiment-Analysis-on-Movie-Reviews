@@ -74,7 +74,8 @@ class My_model(object):
             self.feature_dim = self.lstm_units
         elif not self.rnn_flag:
             features = cnn_feature
-            self.feature_dim = self.cnn_kernels * len(self.cnn_ngrams)
+            self.feature_dim = self.cnn_kernels
+            # self.feature_dim = self.cnn_kernels * len(self.cnn_ngrams)
 
         if self.mode == 'train':
             keep_prob = self.keep_prob
@@ -206,7 +207,9 @@ class My_model(object):
                                             strides=[1,1,1,1], padding='VALID')
             feature = tf.reshape(conv_relu_pooling, [-1, self.cnn_kernels])
             cnn_feature.append(feature)
-        cnn_feature = tf.concat(cnn_feature, axis=1)
+        # use average cnn feature
+        cnn_feature = tf.divide(tf.add_n(cnn_feature), len(cnn_feature))
+        # cnn_feature = tf.concat(cnn_feature, axis=1)
         return cnn_feature
 
     def _full_connected(self, features):
