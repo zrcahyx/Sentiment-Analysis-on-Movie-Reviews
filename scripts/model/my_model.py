@@ -49,7 +49,7 @@ class My_model(object):
         self.output_units = output_units
         self.beta = beta
         self.keep_prob = keep_prob
-        self.regularizer = layers.l2_regularizer()
+        self.regularizer = layers.l2_regularizer(scale=1.0)
         self.seq_len = cf.getint('Data', self.mode + '_seq_len')
 
         with tf.name_scope('Look_up'):
