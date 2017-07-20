@@ -131,10 +131,10 @@ def _run_training():
                     avg_acc = 0.9 * avg_acc + 0.1 * train_acc
                     dev_loss, dev_acc = sess.run([dev_model.loss,
                                                   dev_model.accuracy])
-                logging.info('train loss for epoch %d step %d is %f'
-                             % (epoch + 1, step + 1, avg_loss))
-                logging.info('dev   loss for epoch %d step %d is %f'
-                             % (epoch + 1, step + 1, dev_loss))
+                    logging.info('train loss for epoch %d step %d is %f'
+                                % (epoch + 1, step + 1, avg_loss))
+                    logging.info('dev   loss for epoch %d step %d is %f'
+                                % (epoch + 1, step + 1, dev_loss))
 
             dev_loss, dev_acc = sess.run([dev_model.loss,
                                                   dev_model.accuracy])
