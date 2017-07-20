@@ -190,7 +190,7 @@ class My_model(object):
                 weights = tf.get_variable(
                                 'weights',
                                 [v, word_dim, 1, self.cnn_kernels],
-                                regularizer=self.regularizer,
+                                regularizer=None,
                                 initializer=xavier_initializer(uniform=False))
                 biases = tf.get_variable('biases',
                                          [self.cnn_kernels],
