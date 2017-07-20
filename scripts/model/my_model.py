@@ -49,7 +49,7 @@ class My_model(object):
         self.output_units = output_units
         self.beta = beta
         self.keep_prob = keep_prob
-        self.regularizer = layers.l2_regularizer(scale=self.beta)
+        self.regularizer = layers.l2_regularizer()
         self.seq_len = cf.getint('Data', self.mode + '_seq_len')
 
         with tf.name_scope('Look_up'):
@@ -67,8 +67,8 @@ class My_model(object):
             with tf.name_scope('ConFeatures'):
                 features = tf.concat([rnn_attention_feature, cnn_feature],
                                     axis=1, name="features")
-            self.feature_dim = (self.cnn_kernels * len(self.cnn_ngrams) +
-                                self.lstm_units)
+            # use average cnn feature
+            self.feature_dim = (self.cnn_kernels + self.lstm_units)
         elif not self.cnn_flag:
             features = rnn_attention_feature
             self.feature_dim = self.lstm_units
@@ -86,8 +86,8 @@ class My_model(object):
             features = nn.dropout(features, keep_prob=keep_prob,
                                   name='dropout')
 
-        pred = self._full_connected(features)
-        self.pred = nn.softmax(pred)
+        logits = self._full_connected(features)
+        self.pred = nn.softmax(logits)
         self.pred_label = tf.argmax(pred, 1)
 
         if self.mode != 'test':
@@ -96,18 +96,18 @@ class My_model(object):
 
             with tf.name_scope('Loss'):
                 normal_loss = tf.reduce_mean(
-                        nn.softmax_cross_entropy_with_logits(logits=pred,
+                        nn.softmax_cross_entropy_with_logits(logits=logits,
                                                              labels=label))
                 # it's a list
                 reg_losses = tf.get_collection(GraphKeys.REGULARIZATION_LOSSES)
                 loss = tf.add(normal_loss,
-                              tf.add_n(reg_losses),
+                              tf.add_n(reg_losses) * self.beta,
                               name='loss')
             self.loss = loss
             tf.summary.scalar('loss', self.loss)
 
             with tf.name_scope('Acc'):
-                correct_prediction = tf.equal(tf.argmax(pred, 1),
+                correct_prediction = tf.equal(tf.argmax(logits, 1),
                                                 tf.argmax(label, 1))
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction,
                                                     tf.float32),
@@ -240,11 +240,11 @@ class My_model(object):
                         biases = tf.get_variable('biases',
                                                  [self.output_units],
                                                  initializer=zeros_initializer())
-                        with tf.name_scope('Pred'):
-                            pred = tf.add(tf.matmul(hidden_output, weights),
+                        with tf.name_scope('Logits'):
+                            logits = tf.add(tf.matmul(hidden_output, weights),
                                         biases,
-                                        name='pred')
-                        return pred
+                                        name='logits')
+                        return logits
                     else:
                         weights = tf.get_variable(
                                     'weights',
@@ -267,11 +267,11 @@ class My_model(object):
                 biases = tf.get_variable('biases',
                                          [self.output_units],
                                          initializer=zeros_initializer())
-            with tf.name_scope('Pred'):
-                pred = tf.add(tf.matmul(features, weights),
+            with tf.name_scope('Logits'):
+                logits = tf.add(tf.matmul(features, weights),
                               biases,
-                              name='pred')
-            return pred
+                              name='logits')
+            return logits
 
 
 class WordVec(object):
