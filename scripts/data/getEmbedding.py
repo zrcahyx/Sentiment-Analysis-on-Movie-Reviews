@@ -34,6 +34,7 @@ def main():
         for line in f:
             if line_idx == 0:
                 dim = len(line.split())
+                print('Word vector dimension is {}'.format(dim))
                 cf.set('Data', 'word_dim', dim)
                 with open(get_cfg_path(), 'w') as f:
                     cf.write(f)
