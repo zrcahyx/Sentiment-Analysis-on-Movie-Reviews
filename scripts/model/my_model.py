@@ -127,10 +127,11 @@ class My_model(object):
     def _rnn_attention(self, word_vec):
         input = tf.unstack(word_vec, axis=1)
 
-        lstm_cell = rnn.LSTMCell(self.lstm_units,
-                                 use_peepholes=True,
-                                 forget_bias=1.0,
-                                 initializer=None)
+        lstm_cell = rnn.LSTMCell(
+                        self.lstm_units,
+                        use_peepholes=True,
+                        forget_bias=1.0,
+                        initializer=tf.random_uniform_initializer(-0.1, 0.1))
 
         if self.mode == 'train':
             keep_prob = self.keep_prob
