@@ -71,12 +71,6 @@ def main():
             print('Line {} processing is done!'.format(line_idx))
             line_idx += 1
 
-    test_num_sentence = (test_data[-1]['SentenceId'] -
-                            test_data[0]['SentenceId'] +
-                            1)
-    print('Number of sentences for test dataset is {}'.format(test_num_sentence))
-    cf.set('Data', 'test_num_sentence', test_num_sentence)
-
     print('Number of different words for test dataset is {}'.format(len(test_word_set)))
     cf.set('Data', 'test_num_word', len(test_word_set))
 
